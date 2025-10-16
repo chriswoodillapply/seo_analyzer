@@ -67,7 +67,7 @@ class AriaLandmarksTest(SEOTest):
                 issue_description=f'Good landmark structure ({landmark_count} landmarks)',
                 recommendation='Continue using ARIA landmarks for screen reader navigation',
                 score=f'{landmark_count} landmarks'
-            )
+            )]
         elif landmark_count >= 1:
             return [TestResult(
                 url=content.url,
@@ -79,7 +79,7 @@ class AriaLandmarksTest(SEOTest):
                 issue_description=f'Limited landmarks ({landmark_count})',
                 recommendation='Add more ARIA landmarks (banner, navigation, main, contentinfo)',
                 score=f'{landmark_count} landmark(s)'
-            )
+            )]
         else:
             return [TestResult(
                 url=content.url,
@@ -91,7 +91,7 @@ class AriaLandmarksTest(SEOTest):
                 issue_description='No ARIA landmarks found',
                 recommendation='Implement ARIA landmarks for better accessibility',
                 score='0 landmarks'
-            )
+            )]
     
     # =========================================================================
     # PHASE 3 TESTS - FULL IMPLEMENTATIONS

@@ -44,7 +44,7 @@ class AxeCoreScanTest(SEOTest):
                 issue_description='axe-core requires JavaScript rendering (Playwright)',
                 recommendation='Enable JavaScript rendering with --javascript flag',
                 score='Requires JS rendering'
-            )
+            )]
         
         # Try to run axe-core if available
         try:
