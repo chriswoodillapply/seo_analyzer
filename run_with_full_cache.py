@@ -71,8 +71,8 @@ def main():
     # If no cache, crawl and fetch
     if not contents:
         print('\n[1] Crawling site...')
-        crawler = URLCrawler(args.url, max_urls=args.max_urls, depth=args.depth)
-        urls = crawler.crawl()
+        crawler = URLCrawler(max_depth=args.depth, max_urls=args.max_urls)
+        urls = crawler.crawl(args.url)
         print(f'   Discovered {len(urls)} URLs')
         
         print('\n[2] Fetching content for all pages...')
