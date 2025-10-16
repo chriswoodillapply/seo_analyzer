@@ -1,0 +1,91 @@
+# This file contains all remaining test method implementations
+# These will be appended to test_executor.py
+
+COPY THESE METHODS INTO test_executor.py AFTER THE favicon test (around line 1740):
+
+```python
+    
+    # =========================================================================
+    # ADDITIONAL HEADER TESTS - PHASE 1
+    # =========================================================================
+    
+    def _test_empty_headers(self, content: PageContent) -> TestResult:
+        """Detect empty header tags"""
+        soup = content.rendered_soup or content.static_soup
+        all_headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+        empty_headers = [h for h in all_headers if not h.text.strip()]
+        
+        if len(empty_headers) == 0:
+            return TestResult(
+                url=content.url,
+                test_id='empty_headers',
+                test_name='Empty Headers Check',
+                category='Header Structure',
+                status=TestStatus.PASS,
+                severity='High',
+                issue_description='All header tags contain text',
+                recommendation='Continue using meaningful header text',
+                score=f'0/{len(all_headers)} empty'
+            )
+        else:
+            header_types = [h.name.upper() for h in empty_headers]
+            return TestResult(
+                url=content.url,
+                test_id='empty_headers',
+                test_name='Empty Headers Check',
+                category='Header Structure',
+                status=TestStatus.FAIL,
+                severity='High',
+                issue_description=f'{len(empty_headers)} empty header tag(s): {", ".join(header_types)}',
+                recommendation='Remove empty headers or add descriptive text',
+                score=f'{len(empty_headers)}/{len(all_headers)} empty'
+            )
+    
+    def _test_header_level_gaps(self, content: PageContent) -> TestResult:
+        """Detect skipped header levels (e.g., H1 -> H3)"""
+        soup = content.rendered_soup or content.static_soup
+        headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+        
+        if not headers:
+            return None
+        
+        header_levels = [int(h.name[1]) for h in headers]
+        
+        gaps = []
+        for i in range(len(header_levels) - 1):
+            current = header_levels[i]
+            next_level = header_levels[i + 1]
+            
+            if next_level > current + 1:
+                gaps.append(f'H{current} → H{next_level}')
+        
+        if not gaps:
+            return TestResult(
+                url=content.url,
+                test_id='header_level_gaps',
+                test_name='Header Level Gaps',
+                category='Header Structure',
+                status=TestStatus.PASS,
+                severity='Medium',
+                issue_description='No header level gaps detected',
+                recommendation='Continue maintaining proper header hierarchy',
+                score='No gaps'
+            )
+        else:
+            return TestResult(
+                url=content.url,
+                test_id='header_level_gaps',
+                test_name='Header Level Gaps',
+                category='Header Structure',
+                status=TestStatus.WARNING,
+                severity='Medium',
+                issue_description=f'Header level gaps found: {", ".join(gaps)}',
+                recommendation='Use sequential header levels (H1→H2→H3) for proper document structure',
+                score=f'{len(gaps)} gap(s)'
+            )
+```
+
+NOW CONTINUING WITH ALL REMAINING TESTS...
+
+The file is getting very long. Let me instead directly append to the actual file in chunks.
+

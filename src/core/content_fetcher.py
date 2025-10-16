@@ -202,6 +202,61 @@ class ContentFetcher:
         try:
             page = self.context.new_page()
             
+            # Set up Core Web Vitals monitoring BEFORE navigation
+            # This is critical because LCP entries aren't buffered and must be observed in real-time
+            page.evaluate_on_new_document('''() => {
+                window.__cwvMetrics = { lcp: null, fcp: null, cls: 0, fid: null };
+                
+                // Largest Contentful Paint - must observe, not query later
+                if (PerformanceObserver.supportedEntryTypes.includes('largest-contentful-paint')) {
+                    const lcpObserver = new PerformanceObserver((list) => {
+                        const entries = list.getEntries();
+                        const lastEntry = entries[entries.length - 1];
+                        window.__cwvMetrics.lcp = {
+                            value: lastEntry.startTime / 1000,
+                            element: lastEntry.element ? lastEntry.element.tagName : 'unknown',
+                            size: lastEntry.size || 0
+                        };
+                    });
+                    lcpObserver.observe({ entryTypes: ['largest-contentful-paint'], buffered: true });
+                }
+                
+                // First Contentful Paint
+                if (PerformanceObserver.supportedEntryTypes.includes('paint')) {
+                    const fcpObserver = new PerformanceObserver((list) => {
+                        for (const entry of list.getEntries()) {
+                            if (entry.name === 'first-contentful-paint') {
+                                window.__cwvMetrics.fcp = entry.startTime / 1000;
+                            }
+                        }
+                    });
+                    fcpObserver.observe({ entryTypes: ['paint'], buffered: true });
+                }
+                
+                // Cumulative Layout Shift
+                if (PerformanceObserver.supportedEntryTypes.includes('layout-shift')) {
+                    const clsObserver = new PerformanceObserver((list) => {
+                        for (const entry of list.getEntries()) {
+                            if (!entry.hadRecentInput) {
+                                window.__cwvMetrics.cls += entry.value;
+                            }
+                        }
+                    });
+                    clsObserver.observe({ entryTypes: ['layout-shift'], buffered: true });
+                }
+                
+                // First Input Delay
+                if (PerformanceObserver.supportedEntryTypes.includes('first-input')) {
+                    const fidObserver = new PerformanceObserver((list) => {
+                        const firstInput = list.getEntries()[0];
+                        if (firstInput) {
+                            window.__cwvMetrics.fid = firstInput.processingStart - firstInput.startTime;
+                        }
+                    });
+                    fidObserver.observe({ entryTypes: ['first-input'], buffered: true });
+                }
+            }''')
+            
             # Navigate to page
             response = page.goto(
                 url,
@@ -209,11 +264,15 @@ class ContentFetcher:
                 wait_until='networkidle'
             )
             
-            # Wait for additional content
-            page.wait_for_timeout(2000)
+            # Wait for LCP to stabilize (Google recommends 3-5 seconds)
+            # LCP changes as larger elements load, so we need to wait for:
+            # 1. All images to load (especially hero images)
+            # 2. Lazy-loaded content
+            # 3. Dynamic content injected by JavaScript
+            page.wait_for_timeout(5000)  # Increased from 2s to 5s for accurate LCP
             
-            # Measure Core Web Vitals
-            core_web_vitals = self._measure_core_web_vitals(page)
+            # Get Core Web Vitals from the observers we set up
+            core_web_vitals = page.evaluate('() => window.__cwvMetrics')
             
             # Get rendered HTML
             rendered_html = page.content()
@@ -265,45 +324,77 @@ class ContentFetcher:
     def _measure_core_web_vitals(self, page: Page) -> Dict[str, float]:
         """Measure Core Web Vitals using browser APIs"""
         try:
+            # Use Performance Timeline API to get metrics that already occurred
             cwv = page.evaluate('''() => {
-                return new Promise((resolve) => {
-                    const metrics = {};
-                    
-                    // Largest Contentful Paint
-                    new PerformanceObserver((entryList) => {
-                        const entries = entryList.getEntries();
-                        if (entries.length > 0) {
-                            metrics.lcp = entries[entries.length - 1].startTime;
-                        }
-                    }).observe({ entryTypes: ['largest-contentful-paint'] });
-                    
-                    // First Contentful Paint
-                    new PerformanceObserver((entryList) => {
-                        const entries = entryList.getEntries();
-                        entries.forEach(entry => {
-                            if (entry.name === 'first-contentful-paint') {
-                                metrics.fcp = entry.startTime;
-                            }
-                        });
-                    }).observe({ entryTypes: ['paint'] });
-                    
-                    // Cumulative Layout Shift
+                const metrics = {};
+                
+                // Get Largest Contentful Paint (LCP)
+                try {
+                    const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
+                    if (lcpEntries.length > 0) {
+                        // Get the most recent LCP entry (it updates as larger elements load)
+                        const lcpEntry = lcpEntries[lcpEntries.length - 1];
+                        metrics.lcp = lcpEntry.startTime / 1000; // Convert to seconds
+                        // Also capture the element details for debugging
+                        metrics.lcpElement = lcpEntry.element ? lcpEntry.element.tagName : 'unknown';
+                        metrics.lcpSize = lcpEntry.size || 0;
+                    }
+                } catch (e) {
+                    // LCP not available in this browser
+                    console.log('LCP not available:', e.message);
+                }
+                
+                // Get First Contentful Paint (FCP)
+                try {
+                    const paintEntries = performance.getEntriesByType('paint');
+                    const fcpEntry = paintEntries.find(entry => entry.name === 'first-contentful-paint');
+                    if (fcpEntry) {
+                        metrics.fcp = fcpEntry.startTime / 1000; // Convert to seconds
+                    }
+                } catch (e) {
+                    // FCP not available
+                }
+                
+                // Calculate Cumulative Layout Shift (CLS)
+                try {
+                    const clsEntries = performance.getEntriesByType('layout-shift');
                     let cls = 0;
-                    new PerformanceObserver((entryList) => {
-                        for (const entry of entryList.getEntries()) {
-                            if (!entry.hadRecentInput) {
-                                cls += entry.value;
-                            }
+                    for (const entry of clsEntries) {
+                        // Only count layout shifts without recent user input
+                        if (!entry.hadRecentInput) {
+                            cls += entry.value;
                         }
-                        metrics.cls = cls;
-                    }).observe({ entryTypes: ['layout-shift'] });
-                    
-                    // Wait then resolve
-                    setTimeout(() => resolve(metrics), 1500);
-                });
+                    }
+                    metrics.cls = cls;
+                } catch (e) {
+                    // CLS not available
+                }
+                
+                // Get Time to First Byte (TTFB) - bonus metric
+                try {
+                    const navEntries = performance.getEntriesByType('navigation');
+                    if (navEntries.length > 0) {
+                        metrics.ttfb = navEntries[0].responseStart / 1000; // Convert to seconds
+                    }
+                } catch (e) {
+                    // TTFB not available
+                }
+                
+                // Get DOM Content Loaded - bonus metric
+                try {
+                    const navEntries = performance.getEntriesByType('navigation');
+                    if (navEntries.length > 0) {
+                        metrics.domContentLoaded = navEntries[0].domContentLoadedEventEnd / 1000;
+                    }
+                } catch (e) {
+                    // DCL not available
+                }
+                
+                return metrics;
             }''')
-            return cwv
-        except:
+            return cwv if cwv else {}
+        except Exception as e:
+            print(f"Error measuring Core Web Vitals: {e}")
             return {}
     
     def fetch_complete(self, url: str) -> PageContent:

@@ -6,18 +6,20 @@ A professional, enterprise-grade SEO analysis tool built with Python that perfor
 
 - **URL Crawling**: Automatically discover and analyze all pages on a website with configurable depth and limits
 - **JavaScript Rendering**: Analyze both static HTML and fully rendered content using Playwright
-- **Comprehensive SEO Tests**: 36 different SEO tests across 11 categories:
-  - Meta Tags (title, description, keywords, Open Graph, etc.)
-  - Header Structure (H1-H6 hierarchy)
-  - Images (alt text, file sizes)
-  - Links (internal/external, broken links)
-  - Content Quality (word count, readability)
-  - Technical SEO (robots.txt, sitemap, canonical tags)
-  - Performance (load times, page size)
-  - Core Web Vitals
-  - Accessibility
-  - Mobile Usability
-  - Security (HTTPS)
+- **Comprehensive SEO Tests**: 93 comprehensive SEO tests across 13 categories:
+  - Meta Tags (title, description, keywords, Open Graph, Twitter Cards, favicon, etc.)
+  - Header Structure (H1-H6 hierarchy, gaps, empty headers)
+  - Images (alt text, dimensions, modern formats, responsive images)
+  - Links (internal/external, broken links, nofollow, pagination, link density)
+  - Content Quality (word count, readability, freshness, multimedia diversity)
+  - Technical SEO (robots.txt, sitemap, canonical, URL structure, redirects, mixed content)
+  - Performance (load times, compression, caching, CDN, render-blocking resources)
+  - Core Web Vitals (LCP, CLS, FCP)
+  - Accessibility (ARIA landmarks, form handling, focus indicators, video captions)
+  - Mobile Usability (viewport, responsive images, touch targets)
+  - Security (HTTPS, headers, SRI, iframe security, cookies, CORS)
+  - Structured Data (Schema.org markup for Organization, Breadcrumb, Video)
+  - International SEO (hreflang, content language, geo-targeting)
 - **Multiple Report Formats**: CSV, Excel, HTML, and JSON
 - **Verbose Logging**: Detailed progress tracking during analysis
 - **Enterprise Architecture**: Clean, modular, testable code structure
