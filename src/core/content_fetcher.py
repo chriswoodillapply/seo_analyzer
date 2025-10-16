@@ -265,6 +265,13 @@ class ContentFetcher:
                 }
             }''')
             
+            # Also set up the metrics object immediately after page creation
+            page.evaluate('''() => {
+                if (!window.__cwvMetrics) {
+                    window.__cwvMetrics = { lcp: null, fcp: null, cls: 0, fid: null };
+                }
+            }''')
+            
             # Navigate to page
             response = page.goto(
                 url,
@@ -277,10 +284,55 @@ class ContentFetcher:
             # 1. All images to load (especially hero images)
             # 2. Lazy-loaded content
             # 3. Dynamic content injected by JavaScript
-            page.wait_for_timeout(5000)  # Increased from 2s to 5s for accurate LCP
+            page.wait_for_timeout(10000)  # Increased to 10s for better LCP capture
             
             # Get Core Web Vitals from the observers we set up
             core_web_vitals = page.evaluate('() => window.__cwvMetrics')
+            
+            # Fallback: If observers didn't work, try to get Core Web Vitals directly
+            if not core_web_vitals or all(v is None for v in core_web_vitals.values() if isinstance(v, (int, float))):
+                core_web_vitals = page.evaluate('''() => {
+                    const metrics = {};
+                    
+                    // Try to get LCP from performance entries
+                    const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
+                    if (lcpEntries.length > 0) {
+                        const lcp = lcpEntries[lcpEntries.length - 1];
+                        metrics.lcp = {
+                            value: lcp.startTime / 1000,
+                            element: lcp.element ? lcp.element.tagName : 'unknown',
+                            size: lcp.size || 0
+                        };
+                    }
+                    
+                    // Try to get FCP from performance entries
+                    const fcpEntries = performance.getEntriesByType('paint');
+                    for (const entry of fcpEntries) {
+                        if (entry.name === 'first-contentful-paint') {
+                            metrics.fcp = entry.startTime / 1000;
+                            break;
+                        }
+                    }
+                    
+                    // Try to get CLS from performance entries
+                    const clsEntries = performance.getEntriesByType('layout-shift');
+                    let cls = 0;
+                    for (const entry of clsEntries) {
+                        if (!entry.hadRecentInput) {
+                            cls += entry.value;
+                        }
+                    }
+                    metrics.cls = cls;
+                    
+                    // Try to get FID from performance entries
+                    const fidEntries = performance.getEntriesByType('first-input');
+                    if (fidEntries.length > 0) {
+                        const fid = fidEntries[0];
+                        metrics.fid = fid.processingStart - fid.startTime;
+                    }
+                    
+                    return metrics;
+                }''')
             
             # Get rendered HTML
             rendered_html = page.content()

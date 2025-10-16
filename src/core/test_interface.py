@@ -11,7 +11,7 @@ Supports two types of tests:
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from dataclasses import dataclass
 from enum import Enum
 
@@ -152,6 +152,23 @@ class SEOTest(ABC):
             should return an INFO status indicating site crawl is required.
         """
         pass
+    
+    def execute_multiple(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+        """
+        Execute the test and return multiple results (for tools like Lighthouse/Axe-core).
+        
+        Override this method for tests that can return multiple results.
+        Default implementation calls execute() and wraps single result.
+        
+        Args:
+            content: PageContent object containing all fetched page data
+            crawl_context: Optional CrawlContext for site-wide tests
+            
+        Returns:
+            List of TestResult objects (empty list if test should be skipped)
+        """
+        result = self.execute(content, crawl_context)
+        return [result] if result else []
     
     def _create_result(
         self,

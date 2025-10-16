@@ -48,9 +48,16 @@ class SEOTestExecutor:
 
         for test in self.registry.get_all_tests():
             try:
-                result = test.execute(content, crawl_context)
-                if result:  # Only add if test returns a result (not None)
-                    self._results.append(result)
+                # Try execute_multiple first (for Lighthouse/Axe-core tests)
+                if hasattr(test, 'execute_multiple'):
+                    results = test.execute_multiple(content, crawl_context)
+                    if results:  # Only add if test returns results
+                        self._results.extend(results)
+                else:
+                    # Fall back to single result
+                    result = test.execute(content, crawl_context)
+                    if result:  # Only add if test returns a result (not None)
+                        self._results.append(result)
             except Exception as e:
                 # Log error but continue with other tests
                 print(f"Error executing test {test.test_id}: {e}")
@@ -69,9 +76,16 @@ class SEOTestExecutor:
 
         for test in self.registry.get_tests_by_category(category):
             try:
-                result = test.execute(content, crawl_context)
-                if result:
-                    results.append(result)
+                # Try execute_multiple first (for Lighthouse/Axe-core tests)
+                if hasattr(test, 'execute_multiple'):
+                    test_results = test.execute_multiple(content, crawl_context)
+                    if test_results:
+                        results.extend(test_results)
+                else:
+                    # Fall back to single result
+                    result = test.execute(content, crawl_context)
+                    if result:
+                        results.append(result)
             except Exception as e:
                 print(f"Error executing test {test.test_id}: {e}")
                 continue
@@ -91,9 +105,16 @@ class SEOTestExecutor:
             test = self.registry.get_test_by_id(test_id)
             if test:
                 try:
-                    result = test.execute(content, crawl_context)
-                    if result:
-                        results.append(result)
+                    # Try execute_multiple first (for Lighthouse/Axe-core tests)
+                    if hasattr(test, 'execute_multiple'):
+                        test_results = test.execute_multiple(content, crawl_context)
+                        if test_results:
+                            results.extend(test_results)
+                    else:
+                        # Fall back to single result
+                        result = test.execute(content, crawl_context)
+                        if result:
+                            results.append(result)
                 except Exception as e:
                     print(f"Error executing test {test_id}: {e}")
                     continue

@@ -24,6 +24,7 @@ class PageMetadata:
     url: str
     status_code: int
     title: Optional[str] = None
+    h1_text: Optional[str] = None  # H1 tag content for uniqueness checking
     word_count: int = 0
     depth_from_home: int = 0
     internal_links_in: int = 0

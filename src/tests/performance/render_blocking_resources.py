@@ -77,7 +77,7 @@ class RenderBlockingResourcesTest(SEOTest):
                 status=TestStatus.FAIL,
                 severity='High',
                 issue_description=f'{total_blocking} render-blocking resources (scripts: {len(blocking_scripts)}, styles: {actual_blocking_styles})',
-                recommendation='Significantly reduce render-blocking resources for better FCP/LCP',
+                recommendation='Significantly reduce render-blocking resources for better FCP',
                 score=f'{total_blocking} blocking'
             )
     
