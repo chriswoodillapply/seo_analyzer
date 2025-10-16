@@ -4,16 +4,30 @@ __pycache__/
 *$py.class
 *.so
 .Python
-*.egg-info/
-dist/
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
 *.egg
+MANIFEST
 
 # Virtual Environment
-seo_env/
+.venv/
 venv/
-env/
 ENV/
+env/
+.env
+seo_env/
 
 # IDE
 .vscode/
@@ -22,29 +36,41 @@ ENV/
 *.swo
 *~
 
-# Output files
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test outputs
+test_output/
+full_analysis_output/
 output/
 *.csv
 *.xlsx
-*.html
 *.json
-
-# OS
-.DS_Store
-Thumbs.db
+*.html
 
 # Logs
 *.log
+logs/
 
-# Testing
+# Cache
+.cache/
 .pytest_cache/
-.coverage
-htmlcov/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# Playwright
 .playwright/
 playwright-state/
 
+# Coverage
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Jupyter Notebook
+.ipynb_checkpoints
