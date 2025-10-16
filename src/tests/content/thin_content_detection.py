@@ -3,7 +3,7 @@
 Thin Content Detection Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -33,7 +33,7 @@ class ThinContentDetectionTest(SEOTest):
     def requires_site_context(self) -> bool:
         return True
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the thin content detection test"""
         
         # Basic word count check (works without crawl context)
@@ -44,7 +44,7 @@ class ThinContentDetectionTest(SEOTest):
         # If no crawl context, do basic check only
         if not crawl_context:
             if words < 300:
-                return TestResult(
+                return [TestResult(
                     url=content.url,
                     test_id=self.test_id,
                     test_name=self.test_name,
@@ -56,7 +56,7 @@ class ThinContentDetectionTest(SEOTest):
                     score=f'{words} words'
                 )
             else:
-                return TestResult(
+                return [TestResult(
                     url=content.url,
                     test_id=self.test_id,
                     test_name=self.test_name,
@@ -96,7 +96,7 @@ class ThinContentDetectionTest(SEOTest):
             issue = f'Good content length: {words} words'
             recommendation = 'Continue providing substantial unique content'
         
-        return TestResult(
+        return [TestResult(
             url=content.url,
             test_id=self.test_id,
             test_name=self.test_name,

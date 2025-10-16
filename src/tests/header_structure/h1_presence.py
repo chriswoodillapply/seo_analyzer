@@ -3,7 +3,7 @@
 H1 Tag Presence Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class H1PresenceTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.CRITICAL
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the h1 tag presence test"""
         soup = content.rendered_soup or content.static_soup
         h1_tags = soup.find_all('h1')
         
         if len(h1_tags) == 1:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='h1_presence',
                 test_name='H1 Tag Presence',
@@ -47,7 +47,7 @@ class H1PresenceTest(SEOTest):
                 score=f'H1: "{h1_tags[0].text.strip()[:50]}..."'
             )
         elif len(h1_tags) == 0:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='h1_presence',
                 test_name='H1 Tag Presence',
@@ -59,7 +59,7 @@ class H1PresenceTest(SEOTest):
                 score='0 H1 tags'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='h1_presence',
                 test_name='H1 Tag Presence',

@@ -3,7 +3,7 @@
 Image Lazy Loading Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,18 +29,18 @@ class ImageLazyLoadingTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the image lazy loading test"""
         soup = content.rendered_soup or content.static_soup
         images = soup.find_all('img')
         
         if not images:
-            return None
+            return []
         
         lazy_images = [img for img in images if img.get('loading') == 'lazy']
         
         if len(lazy_images) > 0:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='img_lazy_loading',
                 test_name='Image Lazy Loading',
@@ -52,7 +52,7 @@ class ImageLazyLoadingTest(SEOTest):
                 score=f'{len(lazy_images)}/{len(images)} lazy loaded'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='img_lazy_loading',
                 test_name='Image Lazy Loading',

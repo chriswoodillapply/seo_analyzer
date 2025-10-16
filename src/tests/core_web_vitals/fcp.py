@@ -3,7 +3,7 @@
 First Contentful Paint (FCP) Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,10 +29,10 @@ class FcpTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the first contentful paint (fcp) test"""
         if not content.core_web_vitals or 'fcp' not in content.core_web_vitals:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='first_contentful_paint',
                 test_name='First Contentful Paint (FCP)',
@@ -59,7 +59,7 @@ class FcpTest(SEOTest):
             issue = f'FCP is poor ({fcp:.0f}ms)'
             recommendation = 'Significantly optimize initial page rendering'
         
-        return TestResult(
+        return [TestResult(
             url=content.url,
             test_id='first_contentful_paint',
             test_name='First Contentful Paint (FCP)',

@@ -3,7 +3,7 @@
 Form Error Handling Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class FormErrorHandlingTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the form error handling test"""
         soup = content.rendered_soup or content.static_soup
         forms = soup.find_all('form')
         
         if not forms:
-            return None
+            return []
         
         inputs_with_aria = 0
         total_inputs = 0
@@ -49,12 +49,12 @@ class FormErrorHandlingTest(SEOTest):
                     inputs_with_aria += 1
         
         if total_inputs == 0:
-            return None
+            return []
         
         percentage = (inputs_with_aria / total_inputs) * 100 if total_inputs else 0
         
         if percentage >= 50:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='form_error_handling',
                 test_name='Form Error Handling',
@@ -66,7 +66,7 @@ class FormErrorHandlingTest(SEOTest):
                 score=f'{percentage:.0f}% accessible'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='form_error_handling',
                 test_name='Form Error Handling',

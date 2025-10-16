@@ -3,7 +3,7 @@
 External Link Security Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class ExternalLinkSecurityTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the external link security test"""
         from urllib.parse import urlparse
         soup = content.rendered_soup or content.static_soup
@@ -42,7 +42,7 @@ class ExternalLinkSecurityTest(SEOTest):
         ]
         
         if not external_links:
-            return None
+            return []
         
         target_blank_links = [
             link for link in external_links
@@ -50,7 +50,7 @@ class ExternalLinkSecurityTest(SEOTest):
         ]
         
         if not target_blank_links:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='external_link_security',
                 test_name='External Link Security',
@@ -69,7 +69,7 @@ class ExternalLinkSecurityTest(SEOTest):
         ]
         
         if not insecure_links:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='external_link_security',
                 test_name='External Link Security',
@@ -81,7 +81,7 @@ class ExternalLinkSecurityTest(SEOTest):
                 score=f'{len(target_blank_links)} secure'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='external_link_security',
                 test_name='External Link Security',

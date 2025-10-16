@@ -3,7 +3,7 @@
 Internal Links Count Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class InternalLinksTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the internal links count test"""
         soup = content.rendered_soup or content.static_soup
         links = soup.find_all('a', href=True)
@@ -43,7 +43,7 @@ class InternalLinksTest(SEOTest):
         ]
         
         if 5 <= len(internal_links) <= 100:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='internal_links',
                 test_name='Internal Links Count',
@@ -55,7 +55,7 @@ class InternalLinksTest(SEOTest):
                 score=f'{len(internal_links)} internal links'
             )
         elif len(internal_links) < 5:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='internal_links',
                 test_name='Internal Links Count',
@@ -67,7 +67,7 @@ class InternalLinksTest(SEOTest):
                 score=f'{len(internal_links)} internal links'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='internal_links',
                 test_name='Internal Links Count',

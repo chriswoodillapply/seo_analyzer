@@ -3,7 +3,7 @@
 Robots.txt Quality Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class RobotsTxtQualityTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the robots.txt quality test"""
         from urllib.parse import urlparse
         import requests
@@ -52,7 +52,7 @@ class RobotsTxtQualityTest(SEOTest):
                     issues.append('No sitemap reference')
                 
                 if not issues:
-                    return TestResult(
+                    return [TestResult(
                         url=content.url,
                         test_id='robots_txt_quality',
                         test_name='Robots.txt Quality',
@@ -64,7 +64,7 @@ class RobotsTxtQualityTest(SEOTest):
                         score='Well configured'
                     )
                 else:
-                    return TestResult(
+                    return [TestResult(
                         url=content.url,
                         test_id='robots_txt_quality',
                         test_name='Robots.txt Quality',
@@ -78,5 +78,5 @@ class RobotsTxtQualityTest(SEOTest):
         except:
             pass
         
-        return None
+        return []
     

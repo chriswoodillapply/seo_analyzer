@@ -3,7 +3,7 @@
 Cumulative Layout Shift (CLS) Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,10 +29,10 @@ class ClsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.CRITICAL
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the cumulative layout shift (cls) test"""
         if not content.core_web_vitals or 'cls' not in content.core_web_vitals:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='cumulative_layout_shift',
                 test_name='Cumulative Layout Shift (CLS)',
@@ -59,7 +59,7 @@ class ClsTest(SEOTest):
             issue = f'CLS is poor ({cls:.3f})'
             recommendation = 'Significantly reduce layout shifts for better user experience'
         
-        return TestResult(
+        return [TestResult(
             url=content.url,
             test_id='cumulative_layout_shift',
             test_name='Cumulative Layout Shift (CLS)',

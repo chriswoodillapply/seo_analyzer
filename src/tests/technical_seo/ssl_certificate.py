@@ -3,7 +3,7 @@
 SSL Certificate Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,12 +29,12 @@ class SslCertificateTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.CRITICAL
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the ssl certificate test"""
         is_https = content.url.startswith('https://')
         
         if is_https:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='ssl_certificate',
                 test_name='SSL Certificate',
@@ -46,7 +46,7 @@ class SslCertificateTest(SEOTest):
                 score='HTTPS enabled'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='ssl_certificate',
                 test_name='SSL Certificate',

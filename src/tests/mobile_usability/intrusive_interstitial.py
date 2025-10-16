@@ -3,7 +3,7 @@
 Intrusive Interstitials Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 import re
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
@@ -30,7 +30,7 @@ class IntrusiveInterstitialTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the intrusive interstitials test"""
         soup = content.rendered_soup or content.static_soup
         
@@ -38,7 +38,7 @@ class IntrusiveInterstitialTest(SEOTest):
         modals = soup.find_all(attrs={'class': re.compile(r'(modal|popup|overlay|interstitial)', re.I)})
         
         if len(modals) > 0:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='intrusive_interstitial',
                 test_name='Intrusive Interstitials',
@@ -50,7 +50,7 @@ class IntrusiveInterstitialTest(SEOTest):
                 score=f'{len(modals)} potential popups'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='intrusive_interstitial',
                 test_name='Intrusive Interstitials',

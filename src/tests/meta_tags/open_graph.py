@@ -3,7 +3,7 @@
 Open Graph Tags Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class OpenGraphTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the open graph tags test"""
         soup = content.rendered_soup or content.static_soup
         og_title = soup.find('meta', attrs={'property': 'og:title'})
@@ -39,7 +39,7 @@ class OpenGraphTest(SEOTest):
         og_count = sum([bool(og_title), bool(og_desc), bool(og_image)])
         
         if og_count >= 2:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='open_graph_tags',
                 test_name='Open Graph Tags',
@@ -51,7 +51,7 @@ class OpenGraphTest(SEOTest):
                 score=f'{og_count}/3 tags present'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='open_graph_tags',
                 test_name='Open Graph Tags',

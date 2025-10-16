@@ -3,7 +3,7 @@
 Mixed Content Detection Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,10 +29,10 @@ class MixedContentDetectionTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the mixed content detection test"""
         if not content.url.startswith('https://'):
-            return None
+            return []
         
         soup = content.rendered_soup or content.static_soup
         insecure_resources = []
@@ -58,7 +58,7 @@ class MixedContentDetectionTest(SEOTest):
                 insecure_resources.append(f'iframe: {iframe["src"][:50]}')
         
         if not insecure_resources:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='mixed_content_detection',
                 test_name='Mixed Content Detection',
@@ -70,7 +70,7 @@ class MixedContentDetectionTest(SEOTest):
                 score='No mixed content'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='mixed_content_detection',
                 test_name='Mixed Content Detection',

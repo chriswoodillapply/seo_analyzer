@@ -3,7 +3,7 @@
 Viewport Meta Tag Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class ViewportTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the viewport meta tag test"""
         soup = content.rendered_soup or content.static_soup
         viewport = soup.find('meta', attrs={'name': 'viewport'})
         
         if viewport and viewport.get('content'):
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='viewport_meta_tag',
                 test_name='Viewport Meta Tag',
@@ -47,7 +47,7 @@ class ViewportTest(SEOTest):
                 score=viewport['content']
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='viewport_meta_tag',
                 test_name='Viewport Meta Tag',

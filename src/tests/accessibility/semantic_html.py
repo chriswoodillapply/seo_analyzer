@@ -3,7 +3,7 @@
 Semantic HTML5 Elements Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,14 +29,14 @@ class SemanticHtmlTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the semantic html5 elements test"""
         soup = content.rendered_soup or content.static_soup
         
         semantic_tags = soup.find_all(['nav', 'main', 'article', 'section', 'aside', 'header', 'footer'])
         
         if len(semantic_tags) >= 3:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='semantic_html',
                 test_name='Semantic HTML5 Elements',
@@ -48,7 +48,7 @@ class SemanticHtmlTest(SEOTest):
                 score=f'{len(semantic_tags)} semantic tags'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='semantic_html',
                 test_name='Semantic HTML5 Elements',

@@ -3,7 +3,7 @@
 Form Labels Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,17 +29,17 @@ class FormLabelsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the form labels test"""
         soup = content.rendered_soup or content.static_soup
         inputs = soup.find_all('input')
         labels = soup.find_all('label')
         
         if not inputs:
-            return None
+            return []
         
         if len(labels) >= len(inputs):
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='form_labels',
                 test_name='Form Labels',
@@ -51,7 +51,7 @@ class FormLabelsTest(SEOTest):
                 score=f'{len(labels)} labels for {len(inputs)} inputs'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='form_labels',
                 test_name='Form Labels',

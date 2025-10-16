@@ -3,7 +3,7 @@
 Robots.txt Presence Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class RobotsTxtTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the robots.txt presence test"""
         from urllib.parse import urlparse
         parsed = urlparse(content.url)
@@ -39,7 +39,7 @@ class RobotsTxtTest(SEOTest):
             import requests
             response = requests.get(robots_url, timeout=5)
             if response.status_code == 200:
-                return TestResult(
+                return [TestResult(
                     url=content.url,
                     test_id='robots_txt',
                     test_name='Robots.txt Presence',
@@ -53,7 +53,7 @@ class RobotsTxtTest(SEOTest):
         except:
             pass
         
-        return TestResult(
+        return [TestResult(
             url=content.url,
             test_id='robots_txt',
             test_name='Robots.txt Presence',

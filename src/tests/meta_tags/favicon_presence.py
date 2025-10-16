@@ -3,7 +3,7 @@
 Favicon Presence Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class FaviconPresenceTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the favicon presence test"""
         soup = content.rendered_soup or content.static_soup
         favicon = (
@@ -39,7 +39,7 @@ class FaviconPresenceTest(SEOTest):
         )
         
         if favicon:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='favicon_presence',
                 test_name='Favicon Presence',
@@ -51,7 +51,7 @@ class FaviconPresenceTest(SEOTest):
                 score='Favicon found'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='favicon_presence',
                 test_name='Favicon Presence',

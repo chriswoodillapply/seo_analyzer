@@ -3,7 +3,7 @@
 CDN Usage Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class CdnUsageTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the cdn usage test"""
         headers = content.static_headers
         
@@ -51,7 +51,7 @@ class CdnUsageTest(SEOTest):
         cdn_in_server = any(cdn in server for cdn in ['cloudflare', 'cloudfront', 'fastly', 'akamai'])
         
         if cdn_detected or cdn_in_server:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='cdn_usage',
                 test_name='CDN Usage',
@@ -63,7 +63,7 @@ class CdnUsageTest(SEOTest):
                 score='CDN in use'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='cdn_usage',
                 test_name='CDN Usage',

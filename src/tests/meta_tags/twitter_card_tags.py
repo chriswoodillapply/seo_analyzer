@@ -3,7 +3,7 @@
 Twitter Card Tags Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class TwitterCardTagsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the twitter card tags test"""
         soup = content.rendered_soup or content.static_soup
         twitter_tags = {
@@ -44,7 +44,7 @@ class TwitterCardTagsTest(SEOTest):
         found_count = len(found_tags)
         
         if found_count >= 3:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='twitter_card_tags',
                 test_name='Twitter Card Tags',
@@ -56,7 +56,7 @@ class TwitterCardTagsTest(SEOTest):
                 score=f'{found_count}/5 tags present'
             )
         elif found_count >= 1:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='twitter_card_tags',
                 test_name='Twitter Card Tags',
@@ -68,7 +68,7 @@ class TwitterCardTagsTest(SEOTest):
                 score=f'{found_count}/5 tags present'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='twitter_card_tags',
                 test_name='Twitter Card Tags',

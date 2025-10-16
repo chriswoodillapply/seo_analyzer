@@ -3,7 +3,7 @@
 CORS Headers Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class CorsHeadersTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the cors headers test"""
         headers = content.static_headers
         
@@ -37,7 +37,7 @@ class CorsHeadersTest(SEOTest):
         
         if cors_header:
             if cors_header == '*':
-                return TestResult(
+                return [TestResult(
                     url=content.url,
                     test_id='cors_headers',
                     test_name='CORS Headers',
@@ -49,7 +49,7 @@ class CorsHeadersTest(SEOTest):
                     score='Permissive'
                 )
             else:
-                return TestResult(
+                return [TestResult(
                     url=content.url,
                     test_id='cors_headers',
                     test_name='CORS Headers',
@@ -61,7 +61,7 @@ class CorsHeadersTest(SEOTest):
                     score='Restricted'
                 )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='cors_headers',
                 test_name='CORS Headers',

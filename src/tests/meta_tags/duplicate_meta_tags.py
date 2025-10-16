@@ -3,7 +3,7 @@
 Duplicate Meta Tags Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class DuplicateMetaTagsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the duplicate meta tags test"""
         soup = content.rendered_soup or content.static_soup
         titles = soup.find_all('title')
@@ -42,7 +42,7 @@ class DuplicateMetaTagsTest(SEOTest):
             issues.append(f'{len(descriptions)} description tags')
         
         if issues:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='duplicate_meta_tags',
                 test_name='Duplicate Meta Tags',
@@ -54,7 +54,7 @@ class DuplicateMetaTagsTest(SEOTest):
                 score='; '.join(issues)
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='duplicate_meta_tags',
                 test_name='Duplicate Meta Tags',

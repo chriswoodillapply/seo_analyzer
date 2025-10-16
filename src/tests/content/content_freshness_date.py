@@ -3,7 +3,7 @@
 Content Freshness Indicators Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 import re
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
@@ -30,7 +30,7 @@ class ContentFreshnessDateTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the content freshness indicators test"""
         import json
         soup = content.rendered_soup or content.static_soup
@@ -55,7 +55,7 @@ class ContentFreshnessDateTest(SEOTest):
         date_meta = soup.find('meta', attrs={'property': re.compile(r'(article:published_time|article:modified_time)', re.I)})
         
         if has_date_schema or date_meta:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='content_freshness_date',
                 test_name='Content Freshness Indicators',
@@ -67,7 +67,7 @@ class ContentFreshnessDateTest(SEOTest):
                 score='Date metadata present'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='content_freshness_date',
                 test_name='Content Freshness Indicators',

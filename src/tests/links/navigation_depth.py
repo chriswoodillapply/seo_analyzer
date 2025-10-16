@@ -3,7 +3,7 @@
 Navigation Depth Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -33,12 +33,12 @@ class NavigationDepthTest(SEOTest):
     def requires_site_context(self) -> bool:
         return True
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the navigation depth test"""
         
         # If no crawl context, return INFO
         if not crawl_context:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -55,7 +55,7 @@ class NavigationDepthTest(SEOTest):
         
         if depth == -1:
             # Page not reachable from homepage
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -68,7 +68,7 @@ class NavigationDepthTest(SEOTest):
             )
         elif depth <= 3:
             # Good depth (0-3 clicks from homepage)
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -81,7 +81,7 @@ class NavigationDepthTest(SEOTest):
             )
         elif depth <= 5:
             # Warning (4-5 clicks)
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -94,7 +94,7 @@ class NavigationDepthTest(SEOTest):
             )
         else:
             # Fail (6+ clicks)
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,

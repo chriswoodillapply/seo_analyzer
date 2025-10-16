@@ -3,7 +3,7 @@
 Multimedia Diversity Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class MultimediaDiversityTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the multimedia diversity test"""
         soup = content.rendered_soup or content.static_soup
         
@@ -44,7 +44,7 @@ class MultimediaDiversityTest(SEOTest):
         media_type_count = sum(1 for v in media_types.values() if v > 0)
         
         if media_type_count >= 2:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='multimedia_diversity',
                 test_name='Multimedia Diversity',
@@ -56,7 +56,7 @@ class MultimediaDiversityTest(SEOTest):
                 score=f'{media_type_count} media types'
             )
         elif media_type_count == 1:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='multimedia_diversity',
                 test_name='Multimedia Diversity',
@@ -68,7 +68,7 @@ class MultimediaDiversityTest(SEOTest):
                 score='1 media type'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='multimedia_diversity',
                 test_name='Multimedia Diversity',

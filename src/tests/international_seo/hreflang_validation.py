@@ -3,7 +3,7 @@
 Hreflang Validation Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class HreflangValidationTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the hreflang validation test"""
         soup = content.rendered_soup or content.static_soup
         hreflang_tags = soup.find_all('link', attrs={'rel': 'alternate', 'hreflang': True})
         
         if not hreflang_tags:
-            return None
+            return []
         
         # Check for x-default
         has_x_default = any(tag.get('hreflang') == 'x-default' for tag in hreflang_tags)
@@ -48,7 +48,7 @@ class HreflangValidationTest(SEOTest):
                 invalid_codes.append(hreflang)
         
         if has_x_default and not invalid_codes:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='hreflang_validation',
                 test_name='Hreflang Validation',
@@ -60,7 +60,7 @@ class HreflangValidationTest(SEOTest):
                 score='Well configured'
             )
         elif invalid_codes:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='hreflang_validation',
                 test_name='Hreflang Validation',
@@ -72,7 +72,7 @@ class HreflangValidationTest(SEOTest):
                 score=f'{len(invalid_codes)} invalid'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='hreflang_validation',
                 test_name='Hreflang Validation',

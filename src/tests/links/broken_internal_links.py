@@ -3,7 +3,7 @@
 Internal Link Quality Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class BrokenInternalLinksTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the internal link quality test"""
         from urllib.parse import urlparse, urljoin
         soup = content.rendered_soup or content.static_soup
@@ -43,7 +43,7 @@ class BrokenInternalLinksTest(SEOTest):
                 internal_links.append(href)
         
         if len(internal_links) == 0:
-            return None
+            return []
         
         # Basic checks for obviously broken links
         suspicious_links = []
@@ -55,7 +55,7 @@ class BrokenInternalLinksTest(SEOTest):
                 suspicious_links.append(link[:50])
         
         if suspicious_links:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='broken_internal_links',
                 test_name='Internal Link Quality',
@@ -67,7 +67,7 @@ class BrokenInternalLinksTest(SEOTest):
                 score=f'{len(suspicious_links)} suspicious'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='broken_internal_links',
                 test_name='Internal Link Quality',

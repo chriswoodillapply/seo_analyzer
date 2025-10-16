@@ -3,7 +3,7 @@
 Orphan Page Check Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -33,12 +33,12 @@ class OrphanPageCheckTest(SEOTest):
     def requires_site_context(self) -> bool:
         return True
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the orphan page check test"""
         
         # If no crawl context, return INFO
         if not crawl_context:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -55,7 +55,7 @@ class OrphanPageCheckTest(SEOTest):
         inbound_count = crawl_context.get_inbound_link_count(content.url)
         
         if is_orphan and content.url != crawl_context.root_url:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -67,7 +67,7 @@ class OrphanPageCheckTest(SEOTest):
                 score=f'{inbound_count} inbound links'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,

@@ -3,7 +3,7 @@
 URL Structure Quality Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class UrlStructureAnalysisTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the url structure quality test"""
         from urllib.parse import urlparse
         
@@ -58,7 +58,7 @@ class UrlStructureAnalysisTest(SEOTest):
             issues.append('No descriptive words in URL')
         
         if not issues:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='url_structure_analysis',
                 test_name='URL Structure Quality',
@@ -70,7 +70,7 @@ class UrlStructureAnalysisTest(SEOTest):
                 score='Well structured'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='url_structure_analysis',
                 test_name='URL Structure Quality',

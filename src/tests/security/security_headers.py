@@ -3,7 +3,7 @@
 Security Headers Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class SecurityHeadersTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the security headers test"""
         headers = content.static_headers
         
@@ -47,7 +47,7 @@ class SecurityHeadersTest(SEOTest):
         found_count = sum(security_headers.values())
         
         if found_count >= 3:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='security_headers',
                 test_name='Security Headers',
@@ -59,7 +59,7 @@ class SecurityHeadersTest(SEOTest):
                 score=f'{found_count}/4 headers present'
             )
         elif found_count >= 1:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='security_headers',
                 test_name='Security Headers',
@@ -71,7 +71,7 @@ class SecurityHeadersTest(SEOTest):
                 score=f'{found_count}/4 headers present'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='security_headers',
                 test_name='Security Headers',

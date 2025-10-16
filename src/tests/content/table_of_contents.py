@@ -3,7 +3,7 @@
 Table of Contents Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 import re
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
@@ -30,7 +30,7 @@ class TableOfContentsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the table of contents test"""
         soup = content.rendered_soup or content.static_soup
         
@@ -49,7 +49,7 @@ class TableOfContentsTest(SEOTest):
         has_toc = len(toc_indicators) > 0 or toc_nav is not None or len(toc_links) >= 3
         
         if has_toc:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='table_of_contents',
                 test_name='Table of Contents',
@@ -61,7 +61,7 @@ class TableOfContentsTest(SEOTest):
                 score='TOC present'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='table_of_contents',
                 test_name='Table of Contents',

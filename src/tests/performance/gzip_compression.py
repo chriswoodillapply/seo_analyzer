@@ -3,7 +3,7 @@
 Compression Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,14 +29,14 @@ class GzipCompressionTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the compression test"""
         headers = content.static_headers
         
         encoding = headers.get('Content-Encoding', '').lower()
         
         if 'gzip' in encoding or 'br' in encoding:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='gzip_compression',
                 test_name='Compression',
@@ -48,7 +48,7 @@ class GzipCompressionTest(SEOTest):
                 score=f'{encoding} enabled'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='gzip_compression',
                 test_name='Compression',

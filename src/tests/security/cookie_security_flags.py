@@ -3,7 +3,7 @@
 Cookie Security Flags Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class CookieSecurityFlagsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the cookie security flags test"""
         headers = content.static_headers
         
@@ -37,7 +37,7 @@ class CookieSecurityFlagsTest(SEOTest):
         set_cookie = headers.get('Set-Cookie', '')
         
         if not set_cookie:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='cookie_security_flags',
                 test_name='Cookie Security Flags',
@@ -57,7 +57,7 @@ class CookieSecurityFlagsTest(SEOTest):
         flags_count = sum([has_secure, has_httponly, has_samesite])
         
         if flags_count >= 2:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='cookie_security_flags',
                 test_name='Cookie Security Flags',
@@ -77,7 +77,7 @@ class CookieSecurityFlagsTest(SEOTest):
             if not has_samesite:
                 missing.append('SameSite')
             
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='cookie_security_flags',
                 test_name='Cookie Security Flags',

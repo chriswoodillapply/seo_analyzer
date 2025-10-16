@@ -3,7 +3,7 @@
 axe-core Accessibility Scan Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,12 +29,12 @@ class AxeCoreScanTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.CRITICAL
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute axe-core accessibility scan"""
         
         # Check if we have rendered content (indicates Playwright was used)
         if not content.rendered_html:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -64,7 +64,7 @@ class AxeCoreScanTest(SEOTest):
                 serious = summary.get('severity_breakdown', {}).get('serious', 0)
                 
                 if total_violations == 0:
-                    return TestResult(
+                    return [TestResult(
                         url=content.url,
                         test_id=self.test_id,
                         test_name=self.test_name,
@@ -78,7 +78,7 @@ class AxeCoreScanTest(SEOTest):
                 
                 elif critical > 0 or serious > 0:
                     top_issues = ', '.join([v['id'] for v in summary.get('top_violations', [])[:3]])
-                    return TestResult(
+                    return [TestResult(
                         url=content.url,
                         test_id=self.test_id,
                         test_name=self.test_name,
@@ -90,7 +90,7 @@ class AxeCoreScanTest(SEOTest):
                         score=f'{total_violations} violations ({critical} critical, {serious} serious)'
                     )
                 else:
-                    return TestResult(
+                    return [TestResult(
                         url=content.url,
                         test_id=self.test_id,
                         test_name=self.test_name,
@@ -103,7 +103,7 @@ class AxeCoreScanTest(SEOTest):
                     )
             
             # If axe hasn't been run yet, return INFO
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -116,7 +116,7 @@ class AxeCoreScanTest(SEOTest):
             )
             
         except ImportError:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,

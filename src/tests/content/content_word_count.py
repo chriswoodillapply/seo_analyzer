@@ -3,7 +3,7 @@
 Content Word Count Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,14 +29,14 @@ class ContentWordCountTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the content word count test"""
         soup = content.rendered_soup or content.static_soup
         text = soup.get_text()
         words = len(text.split())
         
         if words >= 300:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='content_word_count',
                 test_name='Content Word Count',
@@ -48,7 +48,7 @@ class ContentWordCountTest(SEOTest):
                 score=f'{words} words'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='content_word_count',
                 test_name='Content Word Count',

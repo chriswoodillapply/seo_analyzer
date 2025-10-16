@@ -3,7 +3,7 @@
 Header Hierarchy Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class HeaderHierarchyTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the header hierarchy test"""
         soup = content.rendered_soup or content.static_soup
         headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
         
         if not headers:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='header_hierarchy',
                 test_name='Header Hierarchy',
@@ -52,7 +52,7 @@ class HeaderHierarchyTest(SEOTest):
         has_h1 = 1 in header_levels
         
         if has_h1:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='header_hierarchy',
                 test_name='Header Hierarchy',
@@ -64,7 +64,7 @@ class HeaderHierarchyTest(SEOTest):
                 score=f'{len(headers)} total headers'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='header_hierarchy',
                 test_name='Header Hierarchy',

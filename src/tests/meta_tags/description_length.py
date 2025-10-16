@@ -3,7 +3,7 @@
 Meta Description Length Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class DescriptionLengthTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the meta description length test"""
         soup = content.rendered_soup or content.static_soup
         meta_desc = soup.find('meta', attrs={'name': 'description'})
         
         if not meta_desc or not meta_desc.get('content'):
-            return None
+            return []
         
         desc_text = meta_desc['content'].strip()
         length = len(desc_text)
@@ -53,7 +53,7 @@ class DescriptionLengthTest(SEOTest):
             issue = f'Description is too long ({length} characters)'
             recommendation = 'Shorten description to prevent truncation in SERPs'
         
-        return TestResult(
+        return [TestResult(
             url=content.url,
             test_id='meta_description_length',
             test_name='Meta Description Length',

@@ -3,7 +3,7 @@
 Video Captions Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class VideoCaptionsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the video captions test"""
         soup = content.rendered_soup or content.static_soup
         videos = soup.find_all('video')
         
         if not videos:
-            return None
+            return []
         
         videos_with_tracks = 0
         for video in videos:
@@ -44,7 +44,7 @@ class VideoCaptionsTest(SEOTest):
                 videos_with_tracks += 1
         
         if videos_with_tracks == len(videos):
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='video_captions',
                 test_name='Video Captions',
@@ -56,7 +56,7 @@ class VideoCaptionsTest(SEOTest):
                 score=f'{videos_with_tracks}/{len(videos)} captioned'
             )
         elif videos_with_tracks > 0:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='video_captions',
                 test_name='Video Captions',
@@ -68,7 +68,7 @@ class VideoCaptionsTest(SEOTest):
                 score=f'{videos_with_tracks}/{len(videos)} captioned'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='video_captions',
                 test_name='Video Captions',

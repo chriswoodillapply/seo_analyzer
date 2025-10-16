@@ -3,7 +3,7 @@
 Modern Image Formats Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,14 +29,14 @@ class ModernImageFormatsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the modern image formats test"""
         soup = content.rendered_soup or content.static_soup
         images = soup.find_all('img')
         picture_sources = soup.find_all('source', attrs={'type': lambda x: x and 'image' in x})
         
         if not images and not picture_sources:
-            return None
+            return []
         
         modern_formats = 0
         
@@ -55,7 +55,7 @@ class ModernImageFormatsTest(SEOTest):
                 modern_formats += 1
         
         if modern_formats > 0:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='img_modern_formats',
                 test_name='Modern Image Formats',
@@ -67,7 +67,7 @@ class ModernImageFormatsTest(SEOTest):
                 score=f'{modern_formats} modern format uses'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='img_modern_formats',
                 test_name='Modern Image Formats',

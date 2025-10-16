@@ -3,7 +3,7 @@
 Link Density Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,12 +29,12 @@ class LinkDensityRatioTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the link density test"""
         soup = content.rendered_soup or content.static_soup
         body = soup.find('body')
         if not body:
-            return None
+            return []
         
         total_text = body.get_text()
         total_text_length = len(total_text.strip())
@@ -43,12 +43,12 @@ class LinkDensityRatioTest(SEOTest):
         link_text_length = sum(len(link.get_text().strip()) for link in links)
         
         if total_text_length == 0:
-            return None
+            return []
         
         link_density = (link_text_length / total_text_length) * 100
         
         if link_density <= 20:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='link_density_ratio',
                 test_name='Link Density',
@@ -60,7 +60,7 @@ class LinkDensityRatioTest(SEOTest):
                 score=f'{link_density:.1f}%'
             )
         elif link_density <= 40:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='link_density_ratio',
                 test_name='Link Density',
@@ -72,7 +72,7 @@ class LinkDensityRatioTest(SEOTest):
                 score=f'{link_density:.1f}%'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='link_density_ratio',
                 test_name='Link Density',

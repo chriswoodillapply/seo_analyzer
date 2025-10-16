@@ -3,7 +3,7 @@
 Redirect Chain Detection Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,11 +29,11 @@ class RedirectChainDetectionTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the redirect chain detection test"""
         # This requires tracking the request history
         # For now, return info status as full implementation needs request tracking
-        return TestResult(
+        return [TestResult(
             url=content.url,
             test_id='redirect_chain_detection',
             test_name='Redirect Chain Detection',

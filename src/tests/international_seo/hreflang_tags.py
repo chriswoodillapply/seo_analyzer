@@ -3,7 +3,7 @@
 Hreflang Tags Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,14 +29,14 @@ class HreflangTagsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the hreflang tags test"""
         soup = content.rendered_soup or content.static_soup
         hreflang_tags = soup.find_all('link', attrs={'rel': 'alternate', 'hreflang': True})
         
         if len(hreflang_tags) > 0:
             languages = [tag.get('hreflang') for tag in hreflang_tags]
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='hreflang_tags',
                 test_name='Hreflang Tags',
@@ -48,7 +48,7 @@ class HreflangTagsTest(SEOTest):
                 score=f'{len(hreflang_tags)} language(s): {", ".join(languages[:5])}'
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='hreflang_tags',
                 test_name='Hreflang Tags',

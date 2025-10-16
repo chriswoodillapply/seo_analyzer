@@ -3,7 +3,7 @@
 Content Language Test
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 import re
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
@@ -30,7 +30,7 @@ class ContentLanguageMetaTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """Execute the content language test"""
         headers = content.static_headers
         soup = content.rendered_soup or content.static_soup
@@ -46,7 +46,7 @@ class ContentLanguageMetaTest(SEOTest):
         meta_lang = soup.find('meta', attrs={'http-equiv': re.compile(r'content-language', re.I)})
         
         if http_lang or html_lang:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='content_language_meta',
                 test_name='Content Language',
@@ -58,7 +58,7 @@ class ContentLanguageMetaTest(SEOTest):
                 score=html_lang or http_lang
             )
         else:
-            return TestResult(
+            return [TestResult(
                 url=content.url,
                 test_id='content_language_meta',
                 test_name='Content Language',
