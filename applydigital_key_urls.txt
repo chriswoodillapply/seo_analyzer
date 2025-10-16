@@ -1,0 +1,22 @@
+# Apply Digital Key Pages for SEO Analysis
+# Homepage and main sections
+https://www.applydigital.com/
+
+# Main navigation pages  
+https://www.applydigital.com/work
+https://www.applydigital.com/services
+https://www.applydigital.com/about
+https://www.applydigital.com/contact
+https://www.applydigital.com/careers
+
+# Key service pages
+https://www.applydigital.com/ai
+https://www.applydigital.com/data
+https://www.applydigital.com/commerce
+
+# Blog/content sections
+https://www.applydigital.com/blog
+https://www.applydigital.com/case-studies
+
+# Important landing pages
+https://www.applydigital.com/insights

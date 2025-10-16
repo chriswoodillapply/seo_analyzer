@@ -27,6 +27,7 @@ venv/
 ENV/
 env/
 .env
+seo_env/
 
 # IDE
 .vscode/
@@ -60,6 +61,8 @@ logs/
 # Cache
 .cache/
 .pytest_cache/
+.playwright/
+playwright-state/
 
 # Coverage
 .coverage
@@ -68,3 +71,6 @@ htmlcov/
 # Temporary files
 *.tmp
 *.temp
+
+# Jupyter Notebook
+.ipynb_checkpoints

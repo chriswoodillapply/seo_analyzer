@@ -1,0 +1,10 @@
+# Sample URLs for multi-URL SEO analysis
+# Lines starting with # are comments and will be ignored
+
+# Apply Digital URLs
+https://www.applydigital.com/
+https://www.applydigital.com/work
+https://www.applydigital.com/ai
+
+# Comparison sites
+https://example.com
