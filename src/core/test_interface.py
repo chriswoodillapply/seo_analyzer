@@ -136,7 +136,7 @@ class SEOTest(ABC):
         return False
     
     @abstractmethod
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """
         Execute the test against the provided page content.
         
@@ -145,30 +145,13 @@ class SEOTest(ABC):
             crawl_context: Optional CrawlContext for site-wide tests
             
         Returns:
-            TestResult object if test is applicable, None if test should be skipped
+            List of TestResult objects (empty list if test should be skipped)
             
         Note:
             If requires_site_context is True and crawl_context is None, the test
             should return an INFO status indicating site crawl is required.
         """
         pass
-    
-    def execute_multiple(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
-        """
-        Execute the test and return multiple results (for tools like Lighthouse/Axe-core).
-        
-        Override this method for tests that can return multiple results.
-        Default implementation calls execute() and wraps single result.
-        
-        Args:
-            content: PageContent object containing all fetched page data
-            crawl_context: Optional CrawlContext for site-wide tests
-            
-        Returns:
-            List of TestResult objects (empty list if test should be skipped)
-        """
-        result = self.execute(content, crawl_context)
-        return [result] if result else []
     
     def _create_result(
         self,

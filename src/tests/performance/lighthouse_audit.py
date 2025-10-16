@@ -40,43 +40,7 @@ class LighthouseAuditTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
-        """Single result fallback - returns overall Lighthouse score"""
-        results = self.execute_multiple(content, crawl_context)
-        if not results:
-            return None
-        
-        # Return a summary result
-        total_issues = len(results)
-        failed_audits = [r for r in results if r.status == TestStatus.FAIL]
-        warning_audits = [r for r in results if r.status == TestStatus.WARNING]
-        
-        if failed_audits:
-            status = TestStatus.FAIL
-            issue = f"Lighthouse found {len(failed_audits)} critical issues and {len(warning_audits)} warnings"
-            recommendation = f"Address {len(failed_audits)} critical Lighthouse issues for better performance and SEO"
-        elif warning_audits:
-            status = TestStatus.WARNING
-            issue = f"Lighthouse found {len(warning_audits)} warnings"
-            recommendation = f"Address {len(warning_audits)} Lighthouse warnings for optimal performance"
-        else:
-            status = TestStatus.PASS
-            issue = "Lighthouse audit passed with no issues"
-            recommendation = "Excellent! All Lighthouse audits passed"
-        
-        return TestResult(
-            url=content.url,
-            test_id=self.test_id,
-            test_name=self.test_name,
-            category=self.category,
-            status=status,
-            severity=self.severity,
-            issue_description=issue,
-            recommendation=recommendation,
-            score=f"{total_issues} total audits"
-        )
-    
-    def execute_multiple(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """
         Execute Lighthouse audit and return multiple results for each failing audit.
         
