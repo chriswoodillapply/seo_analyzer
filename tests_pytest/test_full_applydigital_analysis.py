@@ -77,7 +77,15 @@ class TestFullApplyDigitalAnalysis:
         # Generate comprehensive reports
         print(f"\n📋 Generating Reports...")
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        base_filename = f"applydigital_full_analysis_{timestamp}"
+        
+        # Extract domain from analyzed URLs for better naming
+        if orchestrator.analyzed_urls:
+            from urllib.parse import urlparse
+            first_url = orchestrator.analyzed_urls[0]
+            domain = urlparse(first_url).netloc.replace('www.', '')
+            base_filename = f"seo_{domain}_{timestamp}"
+        else:
+            base_filename = f"seo_analysis_{timestamp}"
         
         report_files = orchestrator.generate_reports(
             formats=['excel', 'csv', 'json', 'html'],
@@ -85,6 +93,7 @@ class TestFullApplyDigitalAnalysis:
         )
         
         print(f"\n📁 Generated Reports:")
+        print(f"📝 Base filename: {base_filename}")
         for format_type, file_path in report_files.items():
             if os.path.exists(file_path):
                 file_size = os.path.getsize(file_path)
@@ -165,6 +174,7 @@ class TestFullApplyDigitalAnalysis:
         print(f"✅ FULL ANALYSIS COMPLETE")
         print(f"📅 Finished at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"📁 Reports saved to: full_analysis_output/")
+        print(f"📝 File naming format: seo_{domain if 'domain' in locals() else 'analysis'}_{timestamp}")
         print("="*80)
         
         # Assertions to verify the analysis was successful
