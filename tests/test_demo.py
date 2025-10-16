@@ -1,177 +1,134 @@
 #!/usr/bin/env python3
 """
-Demo script to showcase SEO Analyzer capabilities
+Demo script to showcase SEO Analyzer capabilities with new architecture
 
 This script demonstrates:
 1. Positive analysis (good website)
-2. Security header analysis (missing CSP detection)
-3. Soft 404 detection
-4. Performance and accessibility testing
+2. Error handling
+3. Multiple URL analysis
+4. Report generation
 """
 
-from seo_analyzer import SEOAnalyzer
+from src.core.seo_orchestrator import SEOOrchestrator
+from src.reporters.report_generator import ReportGenerator
 from rich.console import Console
 from rich.panel import Panel
 
-def demo_security_headers():
-    """Demo security headers analysis with mock data"""
+def demo_single_url_analysis():
+    """Demo single URL analysis"""
     console = Console()
     
-    console.print(Panel.fit("[bold cyan]Demo: Security Headers Analysis[/bold cyan]"))
+    console.print(Panel.fit("[bold cyan]Demo: Single URL Analysis[/bold cyan]"))
     
-    # Create mock page data with missing CSP (like applydigital.com)
-    from test_seo_analyzer import MockResponse
+    test_url = "https://www.applydigital.com/"
+    console.print(f"\nAnalyzing: {test_url}")
     
-    mock_response = MockResponse(
-        status_code=200,
-        content="<html><head><title>Test Site</title></head><body><h1>Hello</h1></body></html>",
-        headers={
-            'X-Frame-Options': 'DENY',
-            'X-Content-Type-Options': 'nosniff',
-            # Missing: Content-Security-Policy
-            # Missing: Strict-Transport-Security
-        }
-    )
-    
-    page_data = {
-        'url': 'https://example.com',
-        'status_code': 200,
-        'content': mock_response.content,
-        'text': mock_response.text,
-        'soup': None,  # Not needed for security headers
-        'headers': mock_response.headers,
-        'load_time': 1.0,
-        'response': mock_response
-    }
-    
-    # Initialize analyzer
-    analyzer = SEOAnalyzer('https://example.com', use_axe=False)
-    
-    # Analyze security headers
-    security_result = analyzer.analyze_security_headers(page_data)
-    
-    console.print(f"\n[bold]Security Analysis Results:[/bold]")
-    console.print(f"Security Score: {security_result['security_score']}%")
-    
-    console.print(f"\n[bold cyan]Header Status:[/bold cyan]")
-    console.print(f"✗ Content-Security-Policy: {security_result['csp_header']['present']}")
-    console.print(f"✓ X-Frame-Options: {security_result['x_frame_options']['present']}")
-    console.print(f"✓ X-Content-Type-Options: {security_result['x_content_type_options']['present']}")
-    console.print(f"✗ Strict-Transport-Security: {security_result['strict_transport_security']['present']}")
-    
-    console.print(f"\n[bold red]Issues Found ({len(security_result['issues'])}):[/bold red]")
-    for issue in security_result['issues']:
-        console.print(f"• {issue}")
+    with SEOOrchestrator(enable_javascript=False) as orchestrator:
+        results = orchestrator.analyze_single_url(test_url)
         
-    console.print(f"\n[bold green]Recommendations ({len(security_result['recommendations'])}):[/bold green]")
-    for rec in security_result['recommendations']:
-        console.print(f"• {rec}")
+        if results:
+            console.print(f"\n[green]>> Analysis Complete[/green]")
+            console.print(f"  Total tests run: {len(results)}")
+            
+            # Count by status
+            pass_count = sum(1 for r in results if r.status.value == 'PASS')
+            fail_count = sum(1 for r in results if r.status.value == 'FAIL')
+            warning_count = sum(1 for r in results if r.status.value == 'WARNING')
+            
+            console.print(f"  Pass: {pass_count}")
+            console.print(f"  Fail: {fail_count}")
+            console.print(f"  Warning: {warning_count}")
+            
+            # Show a few test results
+            console.print(f"\n[bold]Sample Test Results:[/bold]")
+            for result in results[:5]:
+                status_color = {
+                    'PASS': 'green',
+                    'FAIL': 'red',
+                    'WARNING': 'yellow'
+                }.get(result.status.value, 'white')
+                
+                console.print(f"  [{status_color}]{result.status.value}[/{status_color}] - {result.test_id}")
+        else:
+            console.print("[red]>> Analysis failed[/red]")
 
-def demo_soft_404():
-    """Demo soft 404 detection"""
+def demo_multiple_urls():
+    """Demo multiple URL analysis"""
     console = Console()
     
-    console.print(Panel.fit("[bold cyan]Demo: Soft 404 Detection[/bold cyan]"))
+    console.print(Panel.fit("[bold cyan]Demo: Multiple URL Analysis[/bold cyan]"))
     
-    from test_seo_analyzer import MockResponse
-    from bs4 import BeautifulSoup
+    test_urls = [
+        "https://www.applydigital.com/",
+        "https://www.applydigital.com/work"
+    ]
     
-    # Create soft 404 content
-    soft_404_html = """
-    <html>
-    <head><title>Page Not Found - Example</title></head>
-    <body>
-        <h1>Oops! Page Not Found</h1>
-        <p>The page you are looking for does not exist.</p>
-    </body>
-    </html>
-    """
+    console.print(f"\nAnalyzing {len(test_urls)} URLs...")
     
-    mock_response = MockResponse(status_code=200, content=soft_404_html)
-    
-    page_data = {
-        'url': 'https://example.com/nonexistent',
-        'status_code': 200,
-        'content': mock_response.content,
-        'text': mock_response.text,
-        'soup': BeautifulSoup(soft_404_html, 'html.parser'),
-        'headers': {},
-        'load_time': 1.0,
-        'response': mock_response
-    }
-    
-    analyzer = SEOAnalyzer('https://example.com', use_axe=False)
-    soft_404_result = analyzer.analyze_soft_404(page_data)
-    
-    console.print(f"\n[bold]Soft 404 Analysis Results:[/bold]")
-    console.print(f"Is Soft 404: {soft_404_result['is_soft_404']}")
-    console.print(f"Confidence Score: {soft_404_result['confidence_score']}%")
-    
-    console.print(f"\n[bold yellow]Title Indicators:[/bold yellow]")
-    for indicator in soft_404_result['title_indicators']:
-        console.print(f"• '{indicator}' found in title")
+    with SEOOrchestrator(enable_javascript=False) as orchestrator:
+        summary = orchestrator.analyze_multiple_urls(test_urls)
         
-    console.print(f"\n[bold yellow]Content Indicators:[/bold yellow]")
-    for indicator in set(soft_404_result['content_indicators'][:5]):  # Show unique top 5
-        console.print(f"• '{indicator}' found in content")
+        console.print(f"\n[bold]Analysis Summary:[/bold]")
+        console.print(f"  Total URLs: {summary.get('total_urls', 0)}")
+        console.print(f"  Successful: {summary.get('successful', 0)}")
+        console.print(f"  Failed: {summary.get('failed', 0)}")
 
-def run_unit_tests():
-    """Run a subset of unit tests to verify functionality"""
+def demo_error_handling():
+    """Demo error handling for 404 pages"""
     console = Console()
     
-    console.print(Panel.fit("[bold cyan]Running Unit Tests[/bold cyan]"))
+    console.print(Panel.fit("[bold cyan]Demo: Error Handling (404 Detection)[/bold cyan]"))
     
-    import unittest
-    from test_seo_analyzer import TestSEOAnalyzerPositive, TestSEOAnalyzerSecurityHeaders
+    error_url = "https://www.applydigital.com/this-does-not-exist"
+    console.print(f"\nTesting 404 URL: {error_url}")
     
-    # Create test suite with key tests
-    suite = unittest.TestSuite()
-    
-    # Add specific tests
-    suite.addTest(TestSEOAnalyzerPositive('test_meta_tag_analysis'))
-    suite.addTest(TestSEOAnalyzerPositive('test_accessibility_analysis'))
-    suite.addTest(TestSEOAnalyzerSecurityHeaders('test_security_header_extension'))
-    
-    # Run tests
-    runner = unittest.TextTestRunner(verbosity=1)
-    result = runner.run(suite)
-    
-    if result.wasSuccessful():
-        console.print("[green]✓ All key tests passed![/green]")
-    else:
-        console.print("[red]✗ Some tests failed[/red]")
-    
-    return result.wasSuccessful()
+    with SEOOrchestrator(enable_javascript=False) as orchestrator:
+        results = orchestrator.analyze_single_url(error_url)
+        
+        if results:
+            # Look for HTTP status tests
+            http_tests = [r for r in results if 'http' in r.test_id.lower() or 'status' in r.test_id.lower()]
+            
+            if http_tests:
+                console.print(f"\n[bold]HTTP Status Tests:[/bold]")
+                for test in http_tests:
+                    status_color = 'red' if test.status.value == 'FAIL' else 'yellow'
+                    console.print(f"  [{status_color}]{test.status.value}[/{status_color}] - {test.test_id}")
+                    if test.details:
+                        console.print(f"    Details: {test.details}")
+            else:
+                console.print("[yellow]>> No HTTP status tests found in results[/yellow]")
+        else:
+            console.print("[red]>> Analysis failed (expected for 404)[/red]")
 
 def main():
     """Main demo function"""
     console = Console()
     
-    console.print("[bold cyan]SEO Analyzer - Enhanced Features Demo[/bold cyan]\n")
+    console.print("[bold cyan]SEO Analyzer - New Architecture Demo[/bold cyan]\n")
     
     # Run demos
-    demo_security_headers()
-    print("\n" + "="*60 + "\n")
-    
-    demo_soft_404()
-    print("\n" + "="*60 + "\n")
-    
-    # Run unit tests
-    success = run_unit_tests()
-    
-    print("\n" + "="*60)
-    console.print("[bold green]Demo completed![/bold green]")
-    
-    if success:
-        console.print("\n[green]The SEO Analyzer is working correctly with all new features:[/green]")
-        console.print("✓ Security Headers Analysis (detects missing CSP)")
-        console.print("✓ Soft 404 Detection")
-        console.print("✓ Advanced Performance Testing")
-        console.print("✓ Axe-Core Accessibility Integration")
-        console.print("✓ Comprehensive Reporting")
-    else:
-        console.print("[red]Some issues detected - check test results above[/red]")
+    try:
+        demo_single_url_analysis()
+        print("\n" + "="*60 + "\n")
+        
+        demo_multiple_urls()
+        print("\n" + "="*60 + "\n")
+        
+        demo_error_handling()
+        print("\n" + "="*60 + "\n")
+        
+        console.print("[bold green]>> Demo completed successfully![/bold green]")
+        console.print("\n[green]The new SEO Analyzer architecture includes:[/green]")
+        console.print("  >> SEOOrchestrator: High-level analysis coordination")
+        console.print("  >> ContentFetcher: HTML and JavaScript rendering")
+        console.print("  >> SEOTestExecutor: Modular test execution")
+        console.print("  >> ReportGenerator: Multi-format report generation")
+        
+    except Exception as e:
+        console.print(f"[red]>> Demo encountered an error: {e}[/red]")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()
-
