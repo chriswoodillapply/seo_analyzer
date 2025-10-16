@@ -201,12 +201,11 @@ class TestFullApplyDigitalAnalysis:
         assert len(orchestrator.analyzed_urls) > 0, "Should have analyzed URLs"
         assert stats['total_tests'] > 0, "Should have test results"
         
-        return {
-            'summary': summary,
-            'stats': stats,
-            'report_files': report_files,
-            'analyzed_urls': len(orchestrator.analyzed_urls)
-        }
+        # Test completed successfully
+        print(f"\n✅ Test completed successfully!")
+        print(f"   Analyzed URLs: {len(orchestrator.analyzed_urls)}")
+        print(f"   Total tests: {stats['total_tests']}")
+        print(f"   Report files: {len(report_files)}")
     
     def test_cache_invalidation(self):
         """Test cache invalidation functionality"""
