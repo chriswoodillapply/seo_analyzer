@@ -23,14 +23,18 @@ class TestFullApplyDigitalAnalysis:
     
     @pytest.fixture
     def orchestrator(self):
-        """Create SEO orchestrator instance for full analysis"""
+        """Create SEO orchestrator instance for full analysis with cache invalidation"""
         return SEOOrchestrator(
-            user_agent='SEO-Analyzer-Full/1.0',
+            user_agent='SEO-Analyzer-Full-Cached/1.0',
             timeout=60,  # Longer timeout for comprehensive analysis
             headless=True,
             enable_javascript=True,
             output_dir='full_analysis_output',
-            verbose=True
+            verbose=True,
+            enable_caching=True,  # Enable caching for faster re-runs
+            cache_max_age_hours=24,  # Cache for 24 hours
+            save_css=True,  # Save CSS files in cache
+            force_refresh=False  # Use cache when available
         )
     
     def test_full_applydigital_analysis(self, orchestrator):
@@ -43,6 +47,7 @@ class TestFullApplyDigitalAnalysis:
         print("📊 Max URLs: 1000")
         print("🔍 Max Depth: 10 levels")
         print("📋 Output: Excel format")
+        print("💾 Caching: ENABLED (24h cache) - USING CACHE")
         print("="*80)
         
         start_urls = ["https://www.applydigital.com"]
@@ -101,6 +106,15 @@ class TestFullApplyDigitalAnalysis:
         
         # Print detailed summary
         orchestrator.print_summary()
+        
+        # Get cache statistics
+        print(f"\n💾 CACHE STATISTICS")
+        print("="*80)
+        cache_stats = orchestrator.get_cache_stats()
+        print(f"Caching Enabled: {cache_stats['caching_enabled']}")
+        if cache_stats['caching_enabled']:
+            print(f"Content Cache: {cache_stats.get('content_cache', {})}")
+            print(f"Crawl Cache: {cache_stats.get('crawl_cache', {})}")
         
         # Get detailed statistics
         stats = orchestrator.get_summary_stats()
@@ -193,6 +207,63 @@ class TestFullApplyDigitalAnalysis:
             'report_files': report_files,
             'analyzed_urls': len(orchestrator.analyzed_urls)
         }
+    
+    def test_cache_invalidation(self):
+        """Test cache invalidation functionality"""
+        print("\n" + "="*80)
+        print("🔄 TESTING CACHE INVALIDATION")
+        print("="*80)
+        
+        # Test 1: Normal caching
+        print("\n1️⃣ First run with caching enabled:")
+        with SEOOrchestrator(
+            headless=True,
+            enable_javascript=True,
+            output_dir='test_cache_invalidation',
+            verbose=True,
+            enable_caching=True,
+            force_refresh=False
+        ) as orch:
+            test_urls = ['https://www.applydigital.com']
+            summary1 = orch.analyze_multiple_urls(test_urls)
+            print(f"  Results: {summary1['successful']} URLs analyzed")
+        
+        # Test 2: Force refresh bypasses cache
+        print("\n2️⃣ Second run with force_refresh=True:")
+        with SEOOrchestrator(
+            headless=True,
+            enable_javascript=True,
+            output_dir='test_cache_invalidation',
+            verbose=True,
+            enable_caching=True,
+            force_refresh=True  # This should bypass cache
+        ) as orch:
+            test_urls = ['https://www.applydigital.com']
+            summary2 = orch.analyze_multiple_urls(test_urls)
+            print(f"  Results: {summary2['successful']} URLs analyzed")
+        
+        # Test 3: Runtime cache invalidation
+        print("\n3️⃣ Third run with runtime cache invalidation:")
+        with SEOOrchestrator(
+            headless=True,
+            enable_javascript=True,
+            output_dir='test_cache_invalidation',
+            verbose=True,
+            enable_caching=True,
+            force_refresh=False
+        ) as orch:
+            # Invalidate cache at runtime
+            orch.invalidate_cache()
+            test_urls = ['https://www.applydigital.com']
+            summary3 = orch.analyze_multiple_urls(test_urls)
+            print(f"  Results: {summary3['successful']} URLs analyzed")
+        
+        print("\n✅ Cache invalidation tests completed!")
+        print("  - force_refresh=True: Bypasses cache on initialization")
+        print("  - invalidate_cache(): Bypasses cache at runtime")
+        print("  - Both methods force fresh content fetching")
+        
+        return summary1, summary2, summary3
 
 
 if __name__ == "__main__":

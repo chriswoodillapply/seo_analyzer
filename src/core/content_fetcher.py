@@ -34,6 +34,10 @@ class PageContent:
     rendered_soup: Optional[BeautifulSoup] = None
     rendered_load_time: Optional[float] = None
     
+    # CSS content for analysis
+    css_files: Dict[str, str] = None  # url -> css_content
+    computed_styles: Dict[str, Dict[str, str]] = None  # selector -> {property: value}
+    
     # Performance metrics
     performance_metrics: Dict[str, Any] = None
     core_web_vitals: Dict[str, float] = None
@@ -46,6 +50,10 @@ class PageContent:
             self.performance_metrics = {}
         if self.core_web_vitals is None:
             self.core_web_vitals = {}
+        if self.css_files is None:
+            self.css_files = {}
+        if self.computed_styles is None:
+            self.computed_styles = {}
 
 
 class ContentFetcher:
@@ -204,7 +212,7 @@ class ContentFetcher:
             
             # Set up Core Web Vitals monitoring BEFORE navigation
             # This is critical because LCP entries aren't buffered and must be observed in real-time
-            page.evaluate_on_new_document('''() => {
+            page.add_init_script('''() => {
                 window.__cwvMetrics = { lcp: null, fcp: null, cls: 0, fid: null };
                 
                 // Largest Contentful Paint - must observe, not query later
@@ -298,8 +306,8 @@ class ContentFetcher:
             
             load_time = time.time() - start_time
             
-            page.close()
-            
+            # Don't close the page yet - we need it for computed styles
+            # Store page reference for later cleanup
             return {
                 'html': rendered_html,
                 'soup': rendered_soup,
@@ -307,6 +315,7 @@ class ContentFetcher:
                 'performance_metrics': performance_metrics,
                 'core_web_vitals': core_web_vitals,
                 'status_code': response.status if response else 0,
+                'page': page,  # Return page object for computed styles
                 'error': None
             }
             
@@ -397,6 +406,107 @@ class ContentFetcher:
             print(f"Error measuring Core Web Vitals: {e}")
             return {}
     
+    def extract_css_files(self, soup: BeautifulSoup, base_url: str) -> Dict[str, str]:
+        """
+        Extract and fetch all CSS files referenced in the page
+        
+        Args:
+            soup: BeautifulSoup object of the page
+            base_url: Base URL for resolving relative links
+            
+        Returns:
+            Dictionary of CSS URL -> CSS content
+        """
+        css_files = {}
+        
+        try:
+            # Find all CSS links
+            css_links = soup.find_all('link', rel='stylesheet')
+            css_links.extend(soup.find_all('style', type='text/css'))
+            
+            for link in css_links:
+                css_url = None
+                css_content = None
+                
+                if link.name == 'link':
+                    # External CSS file
+                    href = link.get('href')
+                    if href:
+                        css_url = self._resolve_url(href, base_url)
+                        try:
+                            response = requests.get(css_url, timeout=self.timeout, headers=self.session.headers)
+                            if response.status_code == 200:
+                                css_content = response.text
+                        except Exception as e:
+                            print(f"Error fetching CSS {css_url}: {e}")
+                            continue
+                
+                elif link.name == 'style':
+                    # Inline CSS
+                    css_url = f"{base_url}#inline-css"
+                    css_content = link.get_text()
+                
+                if css_url and css_content:
+                    css_files[css_url] = css_content
+                    
+        except Exception as e:
+            print(f"Error extracting CSS files: {e}")
+        
+        return css_files
+    
+    def get_computed_styles(self, page: 'Page') -> Dict[str, Dict[str, str]]:
+        """
+        Get computed styles for elements using Playwright
+        
+        Args:
+            page: Playwright page object
+            
+        Returns:
+            Dictionary of selector -> {property: value}
+        """
+        try:
+            # Get computed styles for common elements
+            selectors = [
+                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'p', 'a', 'button', 'input', 'img',
+                'nav', 'header', 'footer', 'main',
+                '.btn', '.button', '.link', '.text'
+            ]
+            
+            computed_styles = {}
+            
+            for selector in selectors:
+                try:
+                    elements = page.query_selector_all(selector)
+                    if elements:
+                        # Get styles for first element of each type
+                        element = elements[0]
+                        styles = page.evaluate('''(element) => {
+                            const computed = window.getComputedStyle(element);
+                            const result = {};
+                            for (let prop of computed) {
+                                result[prop] = computed.getPropertyValue(prop);
+                            }
+                            return result;
+                        }''', element)
+                        
+                        if styles:
+                            computed_styles[selector] = styles
+                            
+                except Exception as e:
+                    continue  # Skip this selector if it fails
+            
+            return computed_styles
+            
+        except Exception as e:
+            print(f"Error getting computed styles: {e}")
+            return {}
+    
+    def _resolve_url(self, url: str, base_url: str) -> str:
+        """Resolve relative URL to absolute URL"""
+        from urllib.parse import urljoin
+        return urljoin(base_url, url)
+    
     def fetch_complete(self, url: str) -> PageContent:
         """
         Fetch both static and rendered content for comprehensive analysis
@@ -421,10 +531,22 @@ class ContentFetcher:
                 error=static_data['error']
             )
         
+        # Extract CSS files from static content
+        css_files = self.extract_css_files(static_data['soup'], url)
+        
         # Fetch rendered content if enabled
         rendered_data = None
+        computed_styles = {}
         if self.enable_javascript:
             rendered_data = self.fetch_rendered_content(url)
+            # Get computed styles from rendered page
+            if rendered_data and 'page' in rendered_data:
+                computed_styles = self.get_computed_styles(rendered_data['page'])
+                # Close the page after getting computed styles
+                try:
+                    rendered_data['page'].close()
+                except:
+                    pass
         
         return PageContent(
             url=url,
@@ -436,6 +558,8 @@ class ContentFetcher:
             rendered_html=rendered_data['html'] if rendered_data else None,
             rendered_soup=rendered_data['soup'] if rendered_data else None,
             rendered_load_time=rendered_data['load_time'] if rendered_data else None,
+            css_files=css_files,
+            computed_styles=computed_styles,
             performance_metrics=rendered_data['performance_metrics'] if rendered_data else {},
             core_web_vitals=rendered_data['core_web_vitals'] if rendered_data else {},
             error=None

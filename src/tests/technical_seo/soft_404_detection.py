@@ -32,7 +32,13 @@ class Soft404DetectionTest(SEOTest):
     def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the soft 404 detection test"""
         # Use RENDERED content (what Google sees after JS execution)
-        soup = content.rendered_soup if content.rendered_soup else content.static_soup
+        # This is critical for modern SPAs and JS-heavy sites
+        if content.rendered_soup is not None:
+            soup = content.rendered_soup
+            content_source = "rendered (JavaScript executed)"
+        else:
+            soup = content.static_soup
+            content_source = "static (no JavaScript)"
         
         # Also check static to see if there's a disconnect
         static_soup = content.static_soup
@@ -75,7 +81,27 @@ class Soft404DetectionTest(SEOTest):
                     break
         
         # Check main content area for error messages
-        main_content = soup.find(['main', 'article', 'div'], class_=lambda x: x and any(c in str(x).lower() for c in ['main', 'content', 'body']))
+        # Try multiple selectors for main content (modern websites use various patterns)
+        main_content = None
+        main_content_selectors = [
+            'main',
+            'article',
+            '[role="main"]',
+            '.main-content',
+            '.content',
+            '.page-content',
+            '.main',
+            '#main',
+            '#content',
+            'div[class*="content"]',
+            'div[class*="main"]'
+        ]
+        
+        for selector in main_content_selectors:
+            main_content = soup.select_one(selector)
+            if main_content:
+                break
+        
         if main_content:
             main_text = main_content.get_text().strip().lower()
             for phrase in ['no results', 'no items', '0 results', '0 items', '0 products', 'not found']:
@@ -89,15 +115,29 @@ class Soft404DetectionTest(SEOTest):
         text = soup.get_text()
         words = len([w for w in text.split() if len(w) > 2])  # Real words only
         
-        if words < 50:
-            soft_404_indicators.append(f'Extremely thin content ({words} words)')
-            soft_404_score += 45  # Almost certainly a soft 404
-        elif words < 150:
-            soft_404_indicators.append(f'Very thin content ({words} words)')
-            soft_404_score += 30
-        elif words < 300:
-            soft_404_indicators.append(f'Thin content ({words} words)')
-            soft_404_score += 15
+        # Adjust thresholds based on content source
+        if content_source == "rendered (JavaScript executed)":
+            # For JS-rendered content, be more lenient since content loads dynamically
+            if words < 100:
+                soft_404_indicators.append(f'Extremely thin content ({words} words)')
+                soft_404_score += 45  # Almost certainly a soft 404
+            elif words < 300:
+                soft_404_indicators.append(f'Very thin content ({words} words)')
+                soft_404_score += 30
+            elif words < 500:
+                soft_404_indicators.append(f'Thin content ({words} words)')
+                soft_404_score += 15
+        else:
+            # For static content, use original thresholds
+            if words < 50:
+                soft_404_indicators.append(f'Extremely thin content ({words} words)')
+                soft_404_score += 45  # Almost certainly a soft 404
+            elif words < 150:
+                soft_404_indicators.append(f'Very thin content ({words} words)')
+                soft_404_score += 30
+            elif words < 300:
+                soft_404_indicators.append(f'Thin content ({words} words)')
+                soft_404_score += 15
         
         # 3. Check for missing H1 (common in empty pages)
         if len(h1_tags) == 0:
@@ -130,6 +170,15 @@ class Soft404DetectionTest(SEOTest):
             if rendered_words < static_words * 0.5 and rendered_words < 200:
                 soft_404_indicators.append(f'Content decreased after JS render ({static_words}→{rendered_words} words)')
                 soft_404_score += 20
+            
+            # Check if page is heavily JavaScript-dependent (potential SEO issue)
+            if static_words < 100 and rendered_words > 500:
+                # Page has very little static content but lots after JS
+                # This could be a soft 404 if the JS content is just navigation/template
+                js_content_ratio = rendered_words / static_words if static_words > 0 else 0
+                if js_content_ratio > 10:  # 10x more content after JS
+                    soft_404_indicators.append(f'Heavily JS-dependent content ({js_content_ratio:.1f}x more after JS)')
+                    soft_404_score += 15
         
         # 6. Check content-to-template ratio
         # If page is mostly navigation/boilerplate, it's thin
@@ -198,6 +247,9 @@ class Soft404DetectionTest(SEOTest):
         if len(soft_404_indicators) > 5:
             indicators_text += f' (+{len(soft_404_indicators)-5} more)'
         
+        # Add content source info to help with debugging
+        content_info = f" [Content: {content_source}]"
+        
         return TestResult(
             url=content.url,
             test_id='soft_404_detection',
@@ -205,7 +257,7 @@ class Soft404DetectionTest(SEOTest):
             category='Technical SEO',
             status=status,
             severity='Critical',
-            issue_description=f'{issue}. Indicators: {indicators_text}',
+            issue_description=f'{issue}. Indicators: {indicators_text}{content_info}',
             recommendation=recommendation,
             score=f'Risk score: {soft_404_score}/100 ({len(soft_404_indicators)} indicators)'
         )
