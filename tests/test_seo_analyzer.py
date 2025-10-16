@@ -19,7 +19,7 @@ import unittest
 from unittest.mock import Mock, patch
 from src.core.seo_orchestrator import SEOOrchestrator
 from src.core.content_fetcher import ContentFetcher, PageContent
-from src.core.test_executor import SEOTestExecutor, TestResult, TestStatus
+from src.core.test_interface import TestResult, TestStatus
 from bs4 import BeautifulSoup
 
 

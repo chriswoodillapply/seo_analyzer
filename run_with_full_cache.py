@@ -20,7 +20,7 @@ from src.core.content_cache import ContentCache, save_crawl_with_content
 from src.crawlers.url_crawler import URLCrawler
 from src.core.content_fetcher import ContentFetcher
 from src.core.test_registry import TestRegistry
-from src.core.test_executor_v2 import SEOTestExecutorV2
+from src.core.seo_test_executor import SEOTestExecutor
 from src.reporters.report_generator import ReportGenerator
 
 
@@ -95,7 +95,7 @@ def main():
     print(f'\n[4] Running tests on {len(contents)} pages...')
     registry = TestRegistry()
     registry.discover_and_register('src.tests')
-    executor = SEOTestExecutorV2(registry)
+    executor = SEOTestExecutor(registry)
     
     print(f'   Registered {registry.get_test_count()} tests')
     

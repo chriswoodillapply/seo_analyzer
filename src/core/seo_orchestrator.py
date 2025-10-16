@@ -5,7 +5,9 @@ SEOOrchestrator - Main coordinator for enterprise SEO analysis
 
 from typing import List, Dict, Any, Optional
 from .content_fetcher import ContentFetcher, PageContent
-from .test_executor import SEOTestExecutor, TestResult
+from .seo_test_executor import SEOTestExecutor
+from .test_interface import TestResult
+from .test_registry import TestRegistry
 from ..crawlers.url_crawler import URLCrawler
 from ..reporters.report_generator import ReportGenerator
 
@@ -54,7 +56,15 @@ class SEOOrchestrator:
             enable_javascript=enable_javascript
         )
         
-        self.test_executor = SEOTestExecutor()
+        # Use the plugin-based executor by default. Auto-discover tests
+        registry = TestRegistry()
+        try:
+            registry.discover_and_register('src.tests')
+        except Exception:
+            # If discovery fails, continue with an empty registry
+            pass
+
+        self.test_executor = SEOTestExecutor(registry)
         self.report_generator = ReportGenerator(output_dir=output_dir)
         
         # Results storage

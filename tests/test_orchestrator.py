@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import Mock, patch, MagicMock
 from src.core.seo_orchestrator import SEOOrchestrator
 from src.core.content_fetcher import PageContent
-from src.core.test_executor import TestResult, TestStatus
+from src.core.test_interface import TestResult, TestStatus
 
 
 class TestSEOOrchestrator(unittest.TestCase):

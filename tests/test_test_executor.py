@@ -5,7 +5,8 @@ Unit tests for SEOTestExecutor class
 
 import unittest
 from bs4 import BeautifulSoup
-from src.core.test_executor import SEOTestExecutor, TestResult, TestStatus
+from src.core.test_executor_v2 import SEOTestExecutorV2
+from src.core.test_interface import TestResult, TestStatus
 from src.core.content_fetcher import PageContent
 
 
@@ -14,7 +15,9 @@ class TestSEOTestExecutor(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures"""
-        self.executor = SEOTestExecutor()
+        # Use v2 executor and load tests from package
+        self.executor = SEOTestExecutorV2()
+        self.executor.load_tests_from_package('src.tests')
         
         self.good_html = """
         <!DOCTYPE html>

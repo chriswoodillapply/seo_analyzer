@@ -31,5 +31,34 @@ class MobileViewportTest(SEOTest):
     
     def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the mobile viewport test"""
-        return self._test_viewport(content)
+        # Inspect rendered or static soup for viewport meta tag
+        soup = content.rendered_soup or content.static_soup
+
+        if not soup:
+            return self._create_result(
+                content,
+                TestStatus.INFO,
+                'No HTML content available to inspect',
+                'Ensure page can be fetched for analysis',
+                'No content'
+            )
+
+        viewport = soup.find('meta', attrs={'name': 'viewport'})
+
+        if viewport and viewport.get('content'):
+            return self._create_result(
+                content,
+                TestStatus.PASS,
+                'Viewport is properly configured for mobile',
+                'Continue maintaining proper viewport configuration',
+                viewport.get('content', '')
+            )
+        else:
+            return self._create_result(
+                content,
+                TestStatus.FAIL,
+                'Missing viewport meta tag',
+                'Add viewport meta tag for mobile responsiveness',
+                'No viewport tag'
+            )
     
