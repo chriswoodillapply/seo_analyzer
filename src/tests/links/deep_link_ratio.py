@@ -3,7 +3,7 @@
 Deep Link Ratio Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -33,12 +33,12 @@ class DeepLinkRatioTest(SEOTest):
     def requires_site_context(self) -> bool:
         return True
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the deep link ratio test"""
         
         # If no crawl context, return INFO
         if not crawl_context:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -54,7 +54,7 @@ class DeepLinkRatioTest(SEOTest):
         outbound_count = crawl_context.get_outbound_link_count(content.url)
         
         if outbound_count == 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -88,7 +88,7 @@ class DeepLinkRatioTest(SEOTest):
             issue = f'Low deep link distribution: {deep_ratio:.1f}% of links go to deeper pages'
             recommendation = 'Add more links to deep pages to improve discoverability'
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id=self.test_id,
             test_name=self.test_name,

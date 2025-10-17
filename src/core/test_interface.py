@@ -135,10 +135,15 @@ class SEOTest(ABC):
         """
         return False
     
-    @abstractmethod
     def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """
         Execute the test against the provided page content.
+        
+        This method now ALWAYS returns a List[TestResult] for consistency.
+        Tests can return:
+        - Empty list [] if test should be skipped
+        - Single result [TestResult] for traditional single-result tests
+        - Multiple results [TestResult, TestResult, ...] for multi-result tests (Lighthouse, Axe-core)
         
         Args:
             content: PageContent object containing all fetched page data
@@ -151,7 +156,39 @@ class SEOTest(ABC):
             If requires_site_context is True and crawl_context is None, the test
             should return an INFO status indicating site crawl is required.
         """
-        pass
+        # Check if subclass has overridden _execute_single_result for backward compatibility
+        single_result = self._execute_single_result(content, crawl_context)
+        if single_result is not None:
+            return [single_result]
+        
+        # Default implementation - override in subclasses
+        return []
+    
+    def execute_single(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+        """
+        Execute the test and return a single result (for backward compatibility).
+        
+        This method provides backward compatibility for tests that return single results.
+        It calls execute() and returns the first result, or None if empty.
+        
+        Args:
+            content: PageContent object containing all fetched page data
+            crawl_context: Optional CrawlContext for site-wide tests
+            
+        Returns:
+            First TestResult object if any results, None if empty
+        """
+        results = self.execute(content, crawl_context)
+        return results[0] if results else None
+    
+    def _execute_single_result(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+        """
+        Backward compatibility method for tests that return single results.
+        
+        Override this method in subclasses that return single results.
+        The base execute() method will automatically wrap the result in a list.
+        """
+        return None
     
     def _create_result(
         self,

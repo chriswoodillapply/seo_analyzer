@@ -3,7 +3,7 @@
 Potentially Oversized Images Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class OversizedImagesTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the potentially oversized images test"""
         soup = content.rendered_soup or content.static_soup
         images = soup.find_all('img', src=True)
         
         if not images:
-            return []
+            return None
         
         # Look for images without optimization indicators
         potentially_large = []
@@ -48,7 +48,7 @@ class OversizedImagesTest(SEOTest):
                     potentially_large.append(src[:50])
         
         if len(potentially_large) > 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='img_oversized_files',
                 test_name='Potentially Oversized Images',
@@ -60,7 +60,7 @@ class OversizedImagesTest(SEOTest):
                 score=f'{len(potentially_large)} potentially large'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='img_oversized_files',
                 test_name='Potentially Oversized Images',

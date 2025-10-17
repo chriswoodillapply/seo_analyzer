@@ -3,7 +3,7 @@
 Video Schema Markup Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class VideoSchemaMarkupTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the video schema markup test"""
         import json
         soup = content.rendered_soup or content.static_soup
@@ -40,7 +40,7 @@ class VideoSchemaMarkupTest(SEOTest):
         has_video_elements = len(soup.find_all('video')) > 0 or len(video_iframes) > 0
         
         if not has_video_elements:
-            return []  # No video, no need to check
+            return None  # No video, no need to check
         
         # Check for VideoObject schema
         json_ld_scripts = soup.find_all('script', attrs={'type': 'application/ld+json'})
@@ -59,7 +59,7 @@ class VideoSchemaMarkupTest(SEOTest):
                 continue
         
         if has_video_schema:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='video_schema_markup',
                 test_name='Video Schema Markup',
@@ -71,7 +71,7 @@ class VideoSchemaMarkupTest(SEOTest):
                 score='Video schema present'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='video_schema_markup',
                 test_name='Video Schema Markup',

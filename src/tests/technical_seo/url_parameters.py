@@ -3,7 +3,7 @@
 URL Parameters Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class UrlParametersTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the url parameters test"""
         from urllib.parse import urlparse
         parsed = urlparse(content.url)
         
         if not parsed.query:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='url_parameters',
                 test_name='URL Parameters',
@@ -51,7 +51,7 @@ class UrlParametersTest(SEOTest):
         param_count = len(params)
         
         if param_count <= 3:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='url_parameters',
                 test_name='URL Parameters',
@@ -63,7 +63,7 @@ class UrlParametersTest(SEOTest):
                 score=f'{param_count} parameter(s)'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='url_parameters',
                 test_name='URL Parameters',

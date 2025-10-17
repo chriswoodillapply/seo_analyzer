@@ -3,7 +3,7 @@
 Sitemap Index Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class SitemapIndexTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the sitemap index test"""
         from urllib.parse import urlparse
         import requests
@@ -40,7 +40,7 @@ class SitemapIndexTest(SEOTest):
         try:
             response = requests.head(sitemap_index_url, timeout=5, allow_redirects=True)
             if response.status_code == 200:
-                return [TestResult(
+                return TestResult(
                     url=content.url,
                     test_id='sitemap_index_presence',
                     test_name='Sitemap Index',
@@ -54,7 +54,7 @@ class SitemapIndexTest(SEOTest):
         except:
             pass
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id='sitemap_index_presence',
             test_name='Sitemap Index',

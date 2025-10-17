@@ -3,7 +3,7 @@
 External Links Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class ExternalLinksTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the external links test"""
         soup = content.rendered_soup or content.static_soup
         links = soup.find_all('a', href=True)
@@ -42,7 +42,7 @@ class ExternalLinksTest(SEOTest):
             if link['href'].startswith('http') and page_domain not in link['href']
         ]
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id='external_links',
             test_name='External Links',

@@ -3,7 +3,7 @@
 Image Dimensions Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class ImageDimensionsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the image dimensions test"""
         soup = content.rendered_soup or content.static_soup
         images = soup.find_all('img')
         
         if not images:
-            return []
+            return None
         
         images_with_dimensions = [
             img for img in images 
@@ -45,7 +45,7 @@ class ImageDimensionsTest(SEOTest):
         percentage = (len(images_with_dimensions) / len(images)) * 100 if images else 0
         
         if percentage >= 80:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='img_dimensions_specified',
                 test_name='Image Dimensions',
@@ -57,7 +57,7 @@ class ImageDimensionsTest(SEOTest):
                 score=f'{percentage:.1f}% with dimensions'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='img_dimensions_specified',
                 test_name='Image Dimensions',

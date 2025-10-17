@@ -3,7 +3,7 @@
 Render-Blocking Resources Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class RenderBlockingResourcesTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the render-blocking resources test"""
         soup = content.rendered_soup or content.static_soup
         
@@ -45,7 +45,7 @@ class RenderBlockingResourcesTest(SEOTest):
         total_blocking = len(blocking_scripts) + actual_blocking_styles
         
         if total_blocking == 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='render_blocking_resources',
                 test_name='Render-Blocking Resources',
@@ -57,7 +57,7 @@ class RenderBlockingResourcesTest(SEOTest):
                 score='0 blocking resources'
             )
         elif total_blocking <= 3:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='render_blocking_resources',
                 test_name='Render-Blocking Resources',
@@ -69,7 +69,7 @@ class RenderBlockingResourcesTest(SEOTest):
                 score=f'{total_blocking} blocking'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='render_blocking_resources',
                 test_name='Render-Blocking Resources',

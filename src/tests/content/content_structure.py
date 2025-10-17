@@ -29,7 +29,7 @@ class ContentStructureTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the content structure test"""
         soup = content.rendered_soup or content.static_soup
         
@@ -40,7 +40,7 @@ class ContentStructureTest(SEOTest):
         structure_score = paragraphs + lists + headers
         
         if structure_score >= 10:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='content_structure',
                 test_name='Content Structure',
@@ -52,7 +52,7 @@ class ContentStructureTest(SEOTest):
                 score=f'P:{paragraphs} Lists:{lists} Headers:{headers}'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='content_structure',
                 test_name='Content Structure',

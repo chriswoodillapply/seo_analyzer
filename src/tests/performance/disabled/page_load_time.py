@@ -3,7 +3,7 @@
 Page Load Time Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class PageLoadTimeTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the page load time test"""
         load_time = content.rendered_load_time or content.static_load_time
         
@@ -46,7 +46,7 @@ class PageLoadTimeTest(SEOTest):
             issue = f'Page loads slowly ({load_time:.2f} seconds)'
             recommendation = 'Optimize images, scripts, and server response for faster loading'
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id='page_load_time',
             test_name='Page Load Time',

@@ -3,7 +3,7 @@
 Anchor Text Quality Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class AnchorTextQualityTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the anchor text quality test"""
         soup = content.rendered_soup or content.static_soup
         links = soup.find_all('a', href=True)
@@ -41,7 +41,7 @@ class AnchorTextQualityTest(SEOTest):
         ]
         
         if len(poor_quality) == 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='anchor_text_quality',
                 test_name='Anchor Text Quality',
@@ -53,7 +53,7 @@ class AnchorTextQualityTest(SEOTest):
                 score=f'{len(links)} links with good anchor text'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='anchor_text_quality',
                 test_name='Anchor Text Quality',

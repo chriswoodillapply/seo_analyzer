@@ -3,7 +3,7 @@
 Title Length Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class TitleLengthTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the title length test"""
         soup = content.rendered_soup or content.static_soup
         title = soup.find('title')
         
         if not title:
-            return []
+            return None
         
         title_text = title.text.strip()
         length = len(title_text)
@@ -56,7 +56,7 @@ class TitleLengthTest(SEOTest):
             issue = f'Title is too long ({length} characters, ~{pixel_width}px)'
             recommendation = 'Shorten title to prevent truncation in search results'
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id='meta_title_length',
             test_name='Title Length',

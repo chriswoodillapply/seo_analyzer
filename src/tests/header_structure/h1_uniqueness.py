@@ -3,7 +3,7 @@
 H1 Tag Uniqueness Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,21 +29,21 @@ class H1UniquenessTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the h1 tag uniqueness test"""
         soup = content.rendered_soup or content.static_soup
         h1_tags = soup.find_all('h1')
         
         # If no H1 tags on this page, skip the test
         if not h1_tags:
-            return []
+            return None
         
         # Get the H1 text from current page
         current_h1_text = h1_tags[0].get_text().strip()
         
         # If no crawl context available, return INFO status
         if not crawl_context:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='h1_uniqueness',
                 test_name='H1 Tag Uniqueness',
@@ -97,7 +97,7 @@ class H1UniquenessTest(SEOTest):
             recommendation = 'H1 tag is properly unique'
             score = 'Unique'
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id='h1_uniqueness',
             test_name='H1 Tag Uniqueness',

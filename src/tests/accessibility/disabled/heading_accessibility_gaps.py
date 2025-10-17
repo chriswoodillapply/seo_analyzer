@@ -3,7 +3,7 @@
 Heading Accessibility Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class HeadingAccessibilityGapsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the heading accessibility test"""
         soup = content.rendered_soup or content.static_soup
         headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
         
         if not headers:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='heading_accessibility_gaps',
                 test_name='Heading Accessibility',
@@ -51,7 +51,7 @@ class HeadingAccessibilityGapsTest(SEOTest):
         
         # Check if starts with H1
         if header_levels[0] != 1:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='heading_accessibility_gaps',
                 test_name='Heading Accessibility',
@@ -70,7 +70,7 @@ class HeadingAccessibilityGapsTest(SEOTest):
                 gaps.append(f'H{header_levels[i]}→H{header_levels[i+1]}')
         
         if not gaps:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='heading_accessibility_gaps',
                 test_name='Heading Accessibility',
@@ -82,7 +82,7 @@ class HeadingAccessibilityGapsTest(SEOTest):
                 score='Proper hierarchy'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='heading_accessibility_gaps',
                 test_name='Heading Accessibility',

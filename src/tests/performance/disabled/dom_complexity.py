@@ -3,7 +3,7 @@
 DOM Complexity Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class DomComplexityTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the dom complexity test"""
         soup = content.rendered_soup or content.static_soup
         dom_elements = len(soup.find_all())
@@ -47,7 +47,7 @@ class DomComplexityTest(SEOTest):
             issue = f'DOM has {dom_elements} elements (excessive)'
             recommendation = 'Reduce DOM complexity for better performance'
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id='dom_complexity',
             test_name='DOM Complexity',

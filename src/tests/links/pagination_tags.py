@@ -3,7 +3,7 @@
 Pagination Tags Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 import re
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
@@ -30,7 +30,7 @@ class PaginationTagsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the pagination tags test"""
         soup = content.rendered_soup or content.static_soup
         rel_prev = soup.find('link', attrs={'rel': 'prev'})
@@ -45,7 +45,7 @@ class PaginationTagsTest(SEOTest):
             if rel_next:
                 tags_found.append('next')
             
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='pagination_rel_tags',
                 test_name='Pagination Tags',
@@ -57,7 +57,7 @@ class PaginationTagsTest(SEOTest):
                 score=f'{len(tags_found)} tag(s)'
             )
         elif is_paginated:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='pagination_rel_tags',
                 test_name='Pagination Tags',
@@ -69,7 +69,7 @@ class PaginationTagsTest(SEOTest):
                 score='Missing pagination tags'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='pagination_rel_tags',
                 test_name='Pagination Tags',

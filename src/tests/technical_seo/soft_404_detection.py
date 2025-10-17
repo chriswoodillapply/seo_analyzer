@@ -3,7 +3,7 @@
 Soft 404 Detection Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class Soft404DetectionTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.CRITICAL
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the soft 404 detection test"""
         # Use RENDERED content (what Google sees after JS execution)
         # This is critical for modern SPAs and JS-heavy sites
@@ -230,7 +230,7 @@ class Soft404DetectionTest(SEOTest):
             issue = 'Possible soft 404: Page shows some indicators of thin/empty content'
             recommendation = 'Review page content. May be flagged as soft 404 by Google. Consider adding more content or proper redirect.'
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='soft_404_detection',
                 test_name='Soft 404 Detection',
@@ -250,7 +250,7 @@ class Soft404DetectionTest(SEOTest):
         # Add content source info to help with debugging
         content_info = f" [Content: {content_source}]"
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id='soft_404_detection',
             test_name='Soft 404 Detection',

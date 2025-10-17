@@ -3,7 +3,7 @@
 Content Readability Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class ContentReadabilityTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the content readability test"""
         soup = content.rendered_soup or content.static_soup
         text = soup.get_text()
@@ -49,7 +49,7 @@ class ContentReadabilityTest(SEOTest):
                 issue = 'Content may be difficult to read'
                 recommendation = 'Use shorter sentences for better readability'
             
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='content_readability',
                 test_name='Content Readability',
@@ -61,5 +61,5 @@ class ContentReadabilityTest(SEOTest):
                 score=f'Avg {avg_sentence_length:.1f} words/sentence'
             )
         
-        return []
+        return None
     

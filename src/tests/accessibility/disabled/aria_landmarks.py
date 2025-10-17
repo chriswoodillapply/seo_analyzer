@@ -3,7 +3,7 @@
 ARIA Landmarks Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class AriaLandmarksTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the aria landmarks test"""
         soup = content.rendered_soup or content.static_soup
         
@@ -57,7 +57,7 @@ class AriaLandmarksTest(SEOTest):
         landmark_count = len(found_landmarks)
         
         if landmark_count >= 3:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='aria_landmarks',
                 test_name='ARIA Landmarks',
@@ -67,9 +67,9 @@ class AriaLandmarksTest(SEOTest):
                 issue_description=f'Good landmark structure ({landmark_count} landmarks)',
                 recommendation='Continue using ARIA landmarks for screen reader navigation',
                 score=f'{landmark_count} landmarks'
-            )]
+            )
         elif landmark_count >= 1:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='aria_landmarks',
                 test_name='ARIA Landmarks',
@@ -79,9 +79,9 @@ class AriaLandmarksTest(SEOTest):
                 issue_description=f'Limited landmarks ({landmark_count})',
                 recommendation='Add more ARIA landmarks (banner, navigation, main, contentinfo)',
                 score=f'{landmark_count} landmark(s)'
-            )]
+            )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='aria_landmarks',
                 test_name='ARIA Landmarks',
@@ -91,7 +91,7 @@ class AriaLandmarksTest(SEOTest):
                 issue_description='No ARIA landmarks found',
                 recommendation='Implement ARIA landmarks for better accessibility',
                 score='0 landmarks'
-            )]
+            )
     
     # =========================================================================
     # PHASE 3 TESTS - FULL IMPLEMENTATIONS

@@ -3,7 +3,7 @@
 Mobile Content Width Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class MobileContentWidthTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the mobile content width test"""
         soup = content.rendered_soup or content.static_soup
         viewport = soup.find('meta', attrs={'name': 'viewport'})
         
         if not viewport:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='mobile_content_width',
                 test_name='Mobile Content Width',
@@ -54,7 +54,7 @@ class MobileContentWidthTest(SEOTest):
         has_no_max_scale = 'maximum-scale' not in viewport_content or 'maximum-scale=1' not in viewport_content
         
         if has_width and has_no_max_scale:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='mobile_content_width',
                 test_name='Mobile Content Width',
@@ -66,7 +66,7 @@ class MobileContentWidthTest(SEOTest):
                 score='Well configured'
             )
         elif has_width:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='mobile_content_width',
                 test_name='Mobile Content Width',
@@ -78,7 +78,7 @@ class MobileContentWidthTest(SEOTest):
                 score='Viewport with restrictions'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='mobile_content_width',
                 test_name='Mobile Content Width',

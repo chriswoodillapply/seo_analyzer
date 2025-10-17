@@ -3,7 +3,7 @@
 Meta Description Presence Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,14 +29,14 @@ class DescriptionPresenceTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the meta description presence test"""
         soup = content.rendered_soup or content.static_soup
         meta_desc = soup.find('meta', attrs={'name': 'description'})
         
         if meta_desc and meta_desc.get('content', '').strip():
             desc_text = meta_desc['content'].strip()
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='meta_description_presence',
                 test_name='Meta Description Presence',
@@ -48,7 +48,7 @@ class DescriptionPresenceTest(SEOTest):
                 score=f'{len(desc_text)} characters'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='meta_description_presence',
                 test_name='Meta Description Presence',

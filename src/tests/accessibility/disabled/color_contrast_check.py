@@ -3,7 +3,7 @@
 Color Contrast Check Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class ColorContrastCheckTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the color contrast check test"""
         
         soup = content.rendered_soup or content.static_soup
@@ -61,7 +61,7 @@ class ColorContrastCheckTest(SEOTest):
                 potential_issues.extend([e.name for e in elements[:5]])
         
         if len(potential_issues) > 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -73,7 +73,7 @@ class ColorContrastCheckTest(SEOTest):
                 score=f'{len(potential_issues)} potential issues'
             )
         elif len(elements_with_color) > 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -85,7 +85,7 @@ class ColorContrastCheckTest(SEOTest):
                 score=f'{len(elements_with_color)} elements checked'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,

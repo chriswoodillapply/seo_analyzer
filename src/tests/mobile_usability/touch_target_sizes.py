@@ -3,7 +3,7 @@
 Touch Target Sizes Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class TouchTargetSizesTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the touch target sizes test"""
         
         soup = content.rendered_soup or content.static_soup
@@ -43,7 +43,7 @@ class TouchTargetSizesTest(SEOTest):
             interactive_elements.extend(elements)
         
         if not interactive_elements:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -73,7 +73,7 @@ class TouchTargetSizesTest(SEOTest):
         
         # This is a basic check - full implementation would use Playwright to measure actual rendered sizes
         if len(small_targets) > 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,
@@ -85,7 +85,7 @@ class TouchTargetSizesTest(SEOTest):
                 score=f'{len(small_targets)}/{checked_count} may be too small'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id=self.test_id,
                 test_name=self.test_name,

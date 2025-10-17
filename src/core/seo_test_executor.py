@@ -48,8 +48,13 @@ class SEOTestExecutor:
 
         for test in self.registry.get_all_tests():
             try:
-                # All tests now return a list of results
+                # Execute test - handle both single results and lists for backward compatibility
                 results = test.execute(content, crawl_context)
+                
+                # Handle backward compatibility: if result is a single TestResult, wrap it in a list
+                if results and not isinstance(results, list):
+                    results = [results]
+                
                 if results:  # Only add if test returns results
                     self._results.extend(results)
             except Exception as e:
@@ -70,9 +75,14 @@ class SEOTestExecutor:
 
         for test in self.registry.get_tests_by_category(category):
             try:
-                # All tests now return a list of results
+                # Execute test - handle both single results and lists for backward compatibility
                 test_results = test.execute(content, crawl_context)
-                if test_results:
+                
+                # Handle backward compatibility: if result is a single TestResult, wrap it in a list
+                if test_results and not isinstance(test_results, list):
+                    test_results = [test_results]
+                
+                if test_results:  # Only add if test returns results
                     results.extend(test_results)
             except Exception as e:
                 print(f"Error executing test {test.test_id}: {e}")
@@ -93,9 +103,14 @@ class SEOTestExecutor:
             test = self.registry.get_test_by_id(test_id)
             if test:
                 try:
-                    # All tests now return a list of results
+                    # Execute test - handle both single results and lists for backward compatibility
                     test_results = test.execute(content, crawl_context)
-                    if test_results:
+                    
+                    # Handle backward compatibility: if result is a single TestResult, wrap it in a list
+                    if test_results and not isinstance(test_results, list):
+                        test_results = [test_results]
+                    
+                    if test_results:  # Only add if test returns results
                         results.extend(test_results)
                 except Exception as e:
                     print(f"Error executing test {test_id}: {e}")

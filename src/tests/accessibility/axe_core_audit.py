@@ -37,6 +37,41 @@ class AxeCoreAuditTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
+        """Single result fallback - returns overall accessibility score"""
+        results = self.execute_multiple(content, crawl_context)
+        if not results:
+            return None
+        
+        # Return a summary result
+        total_violations = len([r for r in results if r.status == TestStatus.FAIL])
+        total_warnings = len([r for r in results if r.status == TestStatus.WARNING])
+        
+        if total_violations > 0:
+            status = TestStatus.FAIL
+            issue = f"Axe-core found {total_violations} accessibility violations and {total_warnings} warnings"
+            recommendation = f"Fix {total_violations} critical accessibility issues for WCAG compliance"
+        elif total_warnings > 0:
+            status = TestStatus.WARNING
+            issue = f"Axe-core found {total_warnings} accessibility warnings"
+            recommendation = f"Address {total_warnings} accessibility warnings for better compliance"
+        else:
+            status = TestStatus.PASS
+            issue = "Axe-core accessibility audit passed with no violations"
+            recommendation = "Excellent! All accessibility checks passed"
+        
+        return TestResult(
+            url=content.url,
+            test_id=self.test_id,
+            test_name=self.test_name,
+            category=self.category,
+            status=status,
+            severity=self.severity,
+            issue_description=issue,
+            recommendation=recommendation,
+            score=f"{total_violations + total_warnings} total issues"
+        )
+    
     def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
         """
         Execute Axe-core audit and return multiple results for each violation.

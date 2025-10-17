@@ -3,7 +3,7 @@
 Meta Refresh Detection Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 import re
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
@@ -30,14 +30,14 @@ class MetaRefreshRedirectTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the meta refresh detection test"""
         soup = content.rendered_soup or content.static_soup
         meta_refresh = soup.find('meta', attrs={'http-equiv': re.compile(r'refresh', re.I)})
         
         if meta_refresh:
             refresh_content = meta_refresh.get('content', '')
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='meta_refresh_redirect',
                 test_name='Meta Refresh Detection',
@@ -49,7 +49,7 @@ class MetaRefreshRedirectTest(SEOTest):
                 score='Meta refresh found'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='meta_refresh_redirect',
                 test_name='Meta Refresh Detection',

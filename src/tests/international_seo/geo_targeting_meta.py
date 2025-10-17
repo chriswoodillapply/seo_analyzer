@@ -3,7 +3,7 @@
 Geographic Targeting Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 import re
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
@@ -30,7 +30,7 @@ class GeoTargetingMetaTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the geographic targeting test"""
         soup = content.rendered_soup or content.static_soup
         
@@ -38,7 +38,7 @@ class GeoTargetingMetaTest(SEOTest):
         
         if geo_tags:
             tag_names = [tag.get('name') for tag in geo_tags]
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='geo_targeting_meta',
                 test_name='Geographic Targeting',
@@ -50,7 +50,7 @@ class GeoTargetingMetaTest(SEOTest):
                 score=f'{len(geo_tags)} geo tags'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='geo_targeting_meta',
                 test_name='Geographic Targeting',

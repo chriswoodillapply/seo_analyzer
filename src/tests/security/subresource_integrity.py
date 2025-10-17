@@ -3,7 +3,7 @@
 Subresource Integrity (SRI) Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class SubresourceIntegrityTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the subresource integrity (sri) test"""
         soup = content.rendered_soup or content.static_soup
         
@@ -42,7 +42,7 @@ class SubresourceIntegrityTest(SEOTest):
         total_external = len(external_scripts) + len(external_styles)
         
         if total_external == 0:
-            return []
+            return None
         
         with_sri = 0
         for resource in external_scripts + external_styles:
@@ -52,7 +52,7 @@ class SubresourceIntegrityTest(SEOTest):
         percentage = (with_sri / total_external) * 100 if total_external else 0
         
         if percentage >= 80:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='subresource_integrity',
                 test_name='Subresource Integrity (SRI)',
@@ -64,7 +64,7 @@ class SubresourceIntegrityTest(SEOTest):
                 score=f'{percentage:.0f}% protected'
             )
         elif percentage > 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='subresource_integrity',
                 test_name='Subresource Integrity (SRI)',
@@ -76,7 +76,7 @@ class SubresourceIntegrityTest(SEOTest):
                 score=f'{percentage:.0f}% protected'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='subresource_integrity',
                 test_name='Subresource Integrity (SRI)',

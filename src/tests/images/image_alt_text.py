@@ -3,7 +3,7 @@
 Image Alt Text Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class ImageAltTextTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the image alt text test"""
         soup = content.rendered_soup or content.static_soup
         images = soup.find_all('img')
         
         if not images:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='img_alt_text',
                 test_name='Image Alt Text',
@@ -50,7 +50,7 @@ class ImageAltTextTest(SEOTest):
         missing_alt = [img for img in images if not img.get('alt')]
         
         if len(missing_alt) == 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='img_alt_text',
                 test_name='Image Alt Text',
@@ -62,7 +62,7 @@ class ImageAltTextTest(SEOTest):
                 score=f'{len(images)}/{len(images)} images with alt'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='img_alt_text',
                 test_name='Image Alt Text',

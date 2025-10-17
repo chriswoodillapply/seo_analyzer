@@ -3,7 +3,7 @@
 Page Size Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class PageSizeTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the page size test"""
         html = content.rendered_html or content.static_html
         size_bytes = len(html.encode('utf-8'))
@@ -49,7 +49,7 @@ class PageSizeTest(SEOTest):
             issue = f'Page size is large ({size_mb:.2f} MB)'
             recommendation = 'Optimize and compress page resources significantly'
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id='page_size',
             test_name='Page Size',

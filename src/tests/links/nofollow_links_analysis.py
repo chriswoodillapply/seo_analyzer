@@ -3,7 +3,7 @@
 Nofollow Links Analysis Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,14 +29,14 @@ class NofollowLinksAnalysisTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the nofollow links analysis test"""
         from urllib.parse import urlparse
         soup = content.rendered_soup or content.static_soup
         all_links = soup.find_all('a', href=True)
         
         if not all_links:
-            return []
+            return None
         
         nofollow_links = [
             link for link in all_links 
@@ -52,7 +52,7 @@ class NofollowLinksAnalysisTest(SEOTest):
         ]
         
         if internal_nofollow:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='nofollow_links_analysis',
                 test_name='Nofollow Links Analysis',
@@ -64,7 +64,7 @@ class NofollowLinksAnalysisTest(SEOTest):
                 score=f'{len(nofollow_links)} total nofollow ({len(internal_nofollow)} internal)'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='nofollow_links_analysis',
                 test_name='Nofollow Links Analysis',

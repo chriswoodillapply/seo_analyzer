@@ -3,7 +3,7 @@
 Iframe Security Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class IframeSecurityTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the iframe security test"""
         soup = content.rendered_soup or content.static_soup
         iframes = soup.find_all('iframe')
         
         if not iframes:
-            return []
+            return None
         
         secure_iframes = 0
         for iframe in iframes:
@@ -45,7 +45,7 @@ class IframeSecurityTest(SEOTest):
         percentage = (secure_iframes / len(iframes)) * 100 if iframes else 0
         
         if percentage >= 80:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='iframe_security',
                 test_name='Iframe Security',
@@ -57,7 +57,7 @@ class IframeSecurityTest(SEOTest):
                 score=f'{percentage:.0f}% sandboxed'
             )
         elif len(iframes) <= 2 and all('youtube.com' in str(iframe.get('src', '')) or 'vimeo.com' in str(iframe.get('src', '')) for iframe in iframes):
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='iframe_security',
                 test_name='Iframe Security',
@@ -69,7 +69,7 @@ class IframeSecurityTest(SEOTest):
                 score='Trusted sources'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='iframe_security',
                 test_name='Iframe Security',

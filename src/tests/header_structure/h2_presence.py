@@ -3,7 +3,7 @@
 H2 Tag Presence Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class H2PresenceTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the h2 tag presence test"""
         soup = content.rendered_soup or content.static_soup
         h2_tags = soup.find_all('h2')
         
         if len(h2_tags) >= 2:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='h2_presence',
                 test_name='H2 Tag Presence',
@@ -47,7 +47,7 @@ class H2PresenceTest(SEOTest):
                 score=f'{len(h2_tags)} H2 tags'
             )
         elif len(h2_tags) == 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='h2_presence',
                 test_name='H2 Tag Presence',
@@ -59,7 +59,7 @@ class H2PresenceTest(SEOTest):
                 score='0 H2 tags'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='h2_presence',
                 test_name='H2 Tag Presence',

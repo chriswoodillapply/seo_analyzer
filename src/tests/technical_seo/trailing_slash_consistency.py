@@ -3,7 +3,7 @@
 Trailing Slash Consistency Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class TrailingSlashConsistencyTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the trailing slash consistency test"""
         soup = content.rendered_soup or content.static_soup
         canonical = soup.find('link', attrs={'rel': 'canonical'})
         
         if not canonical:
-            return []
+            return None
         
         canonical_url = canonical.get('href', '')
         
@@ -43,7 +43,7 @@ class TrailingSlashConsistencyTest(SEOTest):
         canonical_ends_with_slash = canonical_url.endswith('/')
         
         if url_ends_with_slash == canonical_ends_with_slash:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='trailing_slash_consistency',
                 test_name='Trailing Slash Consistency',
@@ -55,7 +55,7 @@ class TrailingSlashConsistencyTest(SEOTest):
                 score='Consistent'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='trailing_slash_consistency',
                 test_name='Trailing Slash Consistency',

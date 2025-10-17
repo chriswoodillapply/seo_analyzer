@@ -3,7 +3,7 @@
 Organization Schema Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class SchemaOrganizationTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the organization schema test"""
         import json
         soup = content.rendered_soup or content.static_soup
@@ -52,7 +52,7 @@ class SchemaOrganizationTest(SEOTest):
                 continue
         
         if has_organization:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='schema_organization',
                 test_name='Organization Schema',
@@ -64,7 +64,7 @@ class SchemaOrganizationTest(SEOTest):
                 score='Organization schema present'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='schema_organization',
                 test_name='Organization Schema',

@@ -3,7 +3,7 @@
 Lighthouse Performance & SEO Scan Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class LighthouseScanTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute Lighthouse scan"""
         
         # For now, return INFO - will be fully implemented when we add Lighthouse integration
@@ -39,7 +39,7 @@ class LighthouseScanTest(SEOTest):
         # 3. Extract scores for Performance, Accessibility, Best Practices, SEO
         # 4. Return aggregated results with detailed recommendations
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id=self.test_id,
             test_name=self.test_name,

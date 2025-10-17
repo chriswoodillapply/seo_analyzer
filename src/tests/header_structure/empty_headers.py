@@ -3,7 +3,7 @@
 Empty Headers Check Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,14 +29,14 @@ class EmptyHeadersTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the empty headers check test"""
         soup = content.rendered_soup or content.static_soup
         all_headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
         empty_headers = [h for h in all_headers if not h.text.strip()]
         
         if len(empty_headers) == 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='empty_headers',
                 test_name='Empty Headers Check',
@@ -49,7 +49,7 @@ class EmptyHeadersTest(SEOTest):
             )
         else:
             header_types = [h.name.upper() for h in empty_headers]
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='empty_headers',
                 test_name='Empty Headers Check',

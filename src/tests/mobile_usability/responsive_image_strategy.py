@@ -3,7 +3,7 @@
 Responsive Image Strategy Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class ResponsiveImageStrategyTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the responsive image strategy test"""
         soup = content.rendered_soup or content.static_soup
         images = soup.find_all('img')
         
         if not images:
-            return []
+            return None
         
         with_srcset = len([img for img in images if img.get('srcset')])
         with_sizes = len([img for img in images if img.get('sizes')])
@@ -45,7 +45,7 @@ class ResponsiveImageStrategyTest(SEOTest):
         responsive_percentage = (responsive_count / len(images)) * 100 if images else 0
         
         if responsive_percentage >= 50:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='responsive_image_strategy',
                 test_name='Responsive Image Strategy',
@@ -57,7 +57,7 @@ class ResponsiveImageStrategyTest(SEOTest):
                 score=f'{responsive_percentage:.0f}% responsive'
             )
         elif responsive_count > 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='responsive_image_strategy',
                 test_name='Responsive Image Strategy',
@@ -69,7 +69,7 @@ class ResponsiveImageStrategyTest(SEOTest):
                 score=f'{responsive_percentage:.0f}% responsive'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='responsive_image_strategy',
                 test_name='Responsive Image Strategy',

@@ -84,9 +84,10 @@ class LighthouseIntegration:
             '--chrome-flags=--headless'
         ]
         
-        # Add categories
-        for category in categories:
-            cmd.append(f'--only-categories={category}')
+        # Add categories (comma-separated)
+        if categories:
+            categories_str = ','.join(categories)
+            cmd.append(f'--only-categories={categories_str}')
         
         # Add Chrome flags
         if chrome_flags:

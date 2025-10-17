@@ -3,7 +3,7 @@
 WWW Consistency Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class WwwConsistencyTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the www consistency test"""
         from urllib.parse import urlparse
         import requests
@@ -51,7 +51,7 @@ class WwwConsistencyTest(SEOTest):
         try:
             response = requests.head(alt_url, timeout=5, allow_redirects=False)
             if response.status_code in [301, 302, 307, 308]:
-                return [TestResult(
+                return TestResult(
                     url=content.url,
                     test_id='www_consistency',
                     test_name='WWW Consistency',
@@ -63,7 +63,7 @@ class WwwConsistencyTest(SEOTest):
                     score='Redirect configured'
                 )
             else:
-                return [TestResult(
+                return TestResult(
                     url=content.url,
                     test_id='www_consistency',
                     test_name='WWW Consistency',
@@ -75,7 +75,7 @@ class WwwConsistencyTest(SEOTest):
                     score='Both versions accessible'
                 )
         except:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='www_consistency',
                 test_name='WWW Consistency',

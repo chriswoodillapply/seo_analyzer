@@ -3,7 +3,7 @@
 Third-Party Scripts Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class ThirdPartyScriptsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the third-party scripts test"""
         from urllib.parse import urlparse
         soup = content.rendered_soup or content.static_soup
@@ -41,7 +41,7 @@ class ThirdPartyScriptsTest(SEOTest):
                       if s['src'].startswith('http') and domain not in s['src']]
         
         if len(third_party) == 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='third_party_scripts',
                 test_name='Third-Party Scripts',
@@ -53,7 +53,7 @@ class ThirdPartyScriptsTest(SEOTest):
                 score='0 third-party scripts'
             )
         elif len(third_party) <= 5:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='third_party_scripts',
                 test_name='Third-Party Scripts',
@@ -65,7 +65,7 @@ class ThirdPartyScriptsTest(SEOTest):
                 score=f'{len(third_party)} scripts'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='third_party_scripts',
                 test_name='Third-Party Scripts',

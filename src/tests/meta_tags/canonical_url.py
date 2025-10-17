@@ -3,7 +3,7 @@
 Canonical URL Test
 """
 
-from typing import Optional, List, TYPE_CHECKING, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class CanonicalUrlTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the canonical url test"""
         soup = content.rendered_soup or content.static_soup
         canonical = soup.find('link', attrs={'rel': 'canonical'})
         
         if canonical and canonical.get('href'):
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='canonical_url',
                 test_name='Canonical URL',
@@ -47,7 +47,7 @@ class CanonicalUrlTest(SEOTest):
                 score=f'Points to: {canonical["href"][:50]}...'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='canonical_url',
                 test_name='Canonical URL',

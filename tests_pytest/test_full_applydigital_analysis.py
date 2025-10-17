@@ -29,7 +29,7 @@ class TestFullApplyDigitalAnalysis:
             timeout=60,  # Longer timeout for comprehensive analysis
             headless=True,
             enable_javascript=True,
-            output_dir='full_analysis_output',
+            output_dir='output/full_applydigital_analysis',
             verbose=True,
             enable_caching=True,  # Enable caching for faster re-runs
             cache_max_age_hours=24,  # Cache for 24 hours

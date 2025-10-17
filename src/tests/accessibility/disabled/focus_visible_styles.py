@@ -3,7 +3,7 @@
 Focus Indicators Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class FocusVisibleStylesTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the focus indicators test"""
         soup = content.rendered_soup or content.static_soup
         
@@ -43,7 +43,7 @@ class FocusVisibleStylesTest(SEOTest):
                 break
         
         if outline_none_found:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='focus_visible_styles',
                 test_name='Focus Indicators',
@@ -55,7 +55,7 @@ class FocusVisibleStylesTest(SEOTest):
                 score='Outline removal detected'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='focus_visible_styles',
                 test_name='Focus Indicators',

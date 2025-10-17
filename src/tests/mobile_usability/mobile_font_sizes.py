@@ -3,7 +3,7 @@
 Mobile Font Sizes Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,10 +29,10 @@ class MobileFontSizesTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the mobile font sizes test"""
         if not content.rendered_soup:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='mobile_font_sizes',
                 test_name='Mobile Font Sizes',
@@ -51,7 +51,7 @@ class MobileFontSizesTest(SEOTest):
         
         # Check if CSS files are available
         if not content.css_files:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='mobile_font_sizes',
                 test_name='Mobile Font Sizes',
@@ -83,7 +83,7 @@ class MobileFontSizesTest(SEOTest):
             recommendation = 'Increase font sizes to minimum 16px for mobile readability'
             score = f'{len(mobile_font_issues)} issues found'
         
-        return [TestResult(
+        return TestResult(
             url=content.url,
             test_id='mobile_font_sizes',
             test_name='Mobile Font Sizes',
@@ -150,7 +150,7 @@ class MobileFontSizesTest(SEOTest):
         if rem_match:
             return float(rem_match.group(1)) * 16
         
-        return []
+        return None
     
     def _is_mobile_context(self, css_content: str, font_size: str) -> bool:
         """Check if font size is in a mobile media query context"""

@@ -29,7 +29,7 @@ class SchemaBreadcrumbTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the breadcrumb schema test"""
         import json
         soup = content.rendered_soup or content.static_soup
@@ -50,7 +50,7 @@ class SchemaBreadcrumbTest(SEOTest):
                 continue
         
         if has_breadcrumb:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='schema_breadcrumb',
                 test_name='Breadcrumb Schema',
@@ -62,5 +62,5 @@ class SchemaBreadcrumbTest(SEOTest):
                 score='Breadcrumb schema present'
             )
         else:
-            return []  # Not all pages need breadcrumbs
+            return None  # Not all pages need breadcrumbs
     

@@ -3,7 +3,7 @@
 Header Level Gaps Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class HeaderLevelGapsTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the header level gaps test"""
         soup = content.rendered_soup or content.static_soup
         headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
         
         if not headers:
-            return []
+            return None
         
         header_levels = [int(h.name[1]) for h in headers]
         
@@ -48,7 +48,7 @@ class HeaderLevelGapsTest(SEOTest):
                 gaps.append(f'H{current} → H{next_level}')
         
         if not gaps:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='header_level_gaps',
                 test_name='Header Level Gaps',
@@ -60,7 +60,7 @@ class HeaderLevelGapsTest(SEOTest):
                 score='No gaps'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='header_level_gaps',
                 test_name='Header Level Gaps',

@@ -3,7 +3,7 @@
 Responsive Images Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,20 +29,20 @@ class ResponsiveImagesSrcsetTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.MEDIUM
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the responsive images test"""
         soup = content.rendered_soup or content.static_soup
         images = soup.find_all('img')
         picture_elements = soup.find_all('picture')
         
         if not images:
-            return []
+            return None
         
         images_with_srcset = [img for img in images if img.get('srcset')]
         responsive_count = len(images_with_srcset) + len(picture_elements)
         
         if responsive_count > 0:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='img_responsive_srcset',
                 test_name='Responsive Images',
@@ -54,7 +54,7 @@ class ResponsiveImagesSrcsetTest(SEOTest):
                 score=f'{responsive_count} responsive images'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='img_responsive_srcset',
                 test_name='Responsive Images',

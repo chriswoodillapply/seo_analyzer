@@ -3,7 +3,7 @@
 Web Font Optimization Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class WebFontOptimizationTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.LOW
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the web font optimization test"""
         soup = content.rendered_soup or content.static_soup
         
@@ -52,10 +52,10 @@ class WebFontOptimizationTest(SEOTest):
             optimizations_found.append('preload')
         
         if not font_links:
-            return []  # No fonts, no need to check
+            return None  # No fonts, no need to check
         
         if len(optimizations_found) >= 1:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='web_font_optimization',
                 test_name='Web Font Optimization',
@@ -67,7 +67,7 @@ class WebFontOptimizationTest(SEOTest):
                 score=f'{len(optimizations_found)} optimization(s)'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='web_font_optimization',
                 test_name='Web Font Optimization',

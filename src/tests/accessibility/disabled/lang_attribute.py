@@ -3,7 +3,7 @@
 Language Attribute Test
 """
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from src.core.test_interface import SEOTest, TestResult, TestStatus, PageContent, TestCategory, TestSeverity
 
 if TYPE_CHECKING:
@@ -29,13 +29,13 @@ class LangAttributeTest(SEOTest):
     def severity(self) -> str:
         return TestSeverity.HIGH
     
-    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> List[TestResult]:
+    def execute(self, content: PageContent, crawl_context: Optional['CrawlContext'] = None) -> Optional[TestResult]:
         """Execute the language attribute test"""
         soup = content.rendered_soup or content.static_soup
         html_tag = soup.find('html')
         
         if html_tag and html_tag.get('lang'):
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='lang_attribute',
                 test_name='Language Attribute',
@@ -47,7 +47,7 @@ class LangAttributeTest(SEOTest):
                 score=f'Lang: {html_tag["lang"]}'
             )
         else:
-            return [TestResult(
+            return TestResult(
                 url=content.url,
                 test_id='lang_attribute',
                 test_name='Language Attribute',
