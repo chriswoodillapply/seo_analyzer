@@ -27,20 +27,23 @@ def setup_test_environment():
         'output/test_lighthouse_results',
         'output/test_axe_core_results', 
         'output/full_seo_analysis_test',
-        'output/full_applydigital_analysis'
+        'output/full_applydigital_analysis',
+        'output/single_url_applydigital'
     ]
     
     for test_dir in test_dirs:
         Path(test_dir).mkdir(parents=True, exist_ok=True)
     
     yield
-    
-    # Cleanup after all tests
-    print("\n🧹 Cleaning up test output directories...")
-    for test_dir in test_dirs:
-        if Path(test_dir).exists():
-            shutil.rmtree(test_dir)
-            print(f"  ✅ Cleaned {test_dir}")
+
+    # Optional cleanup after all tests (disabled by default)
+    clean_outputs = os.environ.get('CLEAN_TEST_OUTPUTS', '0') in ('1', 'true', 'True')
+    if clean_outputs:
+        print("\n🧹 Cleaning up test output directories (CLEAN_TEST_OUTPUTS=1)...")
+        for test_dir in test_dirs:
+            if Path(test_dir).exists():
+                shutil.rmtree(test_dir)
+                print(f"  ✅ Cleaned {test_dir}")
 
 
 @pytest.fixture

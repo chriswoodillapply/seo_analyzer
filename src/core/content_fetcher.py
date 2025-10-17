@@ -41,6 +41,8 @@ class PageContent:
     # Performance metrics
     performance_metrics: Dict[str, Any] = None
     core_web_vitals: Dict[str, float] = None
+    # Accessibility (axe-core) results
+    axe_results: Optional[Dict[str, Any]] = None
     
     # Error tracking
     error: Optional[str] = None
@@ -334,6 +336,17 @@ class ContentFetcher:
                     return metrics;
                 }''')
             
+            # Run axe-core accessibility scan before reading content
+            axe_results = None
+            try:
+                # Import locally to avoid import overhead when JS is disabled
+                from ..integrations.axe_core import AxeCoreIntegration
+                if AxeCoreIntegration.inject_axe_core(page):
+                    axe_results = AxeCoreIntegration.run_axe_scan(page)
+            except Exception as e:
+                # Non-fatal; continue without axe results
+                axe_results = None
+
             # Get rendered HTML
             rendered_html = page.content()
             rendered_soup = BeautifulSoup(rendered_html, 'html.parser')
@@ -366,6 +379,7 @@ class ContentFetcher:
                 'load_time': load_time,
                 'performance_metrics': performance_metrics,
                 'core_web_vitals': core_web_vitals,
+                'axe_results': axe_results,
                 'status_code': response.status if response else 0,
                 'page': page,  # Return page object for computed styles
                 'error': None
@@ -378,6 +392,7 @@ class ContentFetcher:
                 'load_time': time.time() - start_time,
                 'performance_metrics': {},
                 'core_web_vitals': {},
+                'axe_results': None,
                 'status_code': 0,
                 'error': str(e)
             }
@@ -614,6 +629,7 @@ class ContentFetcher:
             computed_styles=computed_styles,
             performance_metrics=rendered_data['performance_metrics'] if rendered_data else {},
             core_web_vitals=rendered_data['core_web_vitals'] if rendered_data else {},
+            axe_results=rendered_data['axe_results'] if rendered_data else None,
             error=None
         )
     
